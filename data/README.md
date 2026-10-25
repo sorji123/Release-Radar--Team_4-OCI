@@ -1,5 +1,20 @@
 # Data for development
 
+## Website release catalog
+
+`releases/26D.json` contains 11 reviewed Oracle Sales, Service and common
+release notes for the browser MVP, with source URLs, brief excerpts, matching
+rules and suggested tests. The catalog is dated October 25, 2026. Run
+`python3 scripts/verify_release_sources.py` to check the excerpts against
+their public pages. Run `python3 -m release_radar build-site` after edits.
+
+The website's fictional configuration inventory lives in
+`config/fusion-customizations.example.json`. The catalog and inventory use the
+browser contract described in [the MVP guide](../docs/MVP.md); they are not
+input to the synthetic Python classifier below.
+
+## Synthetic pipeline fixtures
+
 `demo/` contains **synthetic** release changes and fictional Northwind Telecom
 configurations. `DEMO` is not an Oracle quarterly release. The `example.invalid`
 URLs are intentional provenance placeholders, not working citations to Oracle.
@@ -27,10 +42,11 @@ Changing the threshold or vectors may produce a pair without a fixture response.
 The demo fails explicitly in that case; add an intentional response or use the
 default settings. Fixture tests verify program behavior, not AI accuracy.
 
-## Curating the first real dataset
+## Expanding the dataset for live OCI analysis
 
-1. Create a separate dataset with 20–30 real items from the selected Oracle
-   What's New release. Confirm the build plan's proposed `26D` is appropriate.
+1. Expand the reviewed selection to 20–30 real items from Oracle's current
+   What's New release, mapping them to the pipeline contract. Verify the
+   current quarter before adding more notes.
 2. Preserve a stable `feature_key`, `release_code`, `module`, `title`, verbatim
    `description`, Oracle's `opt_in` (`Y`/`N`), `source_kind=ORACLE`, and the exact
    official `source_url`. A URL alone does not verify a copied claim.
