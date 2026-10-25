@@ -1,5 +1,18 @@
 # APEX starter page guide
 
+## Initial browser MVP
+
+The working browser interface can be installed as a Static Content region.
+Run `python3 -m release_radar build-site`, upload the generated asset ZIP to
+Static Application Files, and use `mvp-region.html` as the region source.
+Follow the [full installation steps](../docs/MVP.md#add-the-mvp-to-an-apex-application).
+This client-side review does not need the database tables below; it uses a
+curated source catalog and explicit rules while native export and OCI integration
+are pending. It is not a full APEX application export and still needs validation
+in the team's APEX workspace.
+
+## Planned database-backed application
+
 **Oracle APEX is the selected application platform.** See the
 [deployment plan](../docs/DEPLOYMENT.md) for the first live milestone.
 
