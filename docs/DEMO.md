@@ -52,13 +52,16 @@ The frontend includes an APEX AJAX adapter for `RR_BOOTSTRAP` and
 `database/demo/`. The SQL still requires validation in the target Oracle
 environment before use.
 
-To create a self-contained Static Content region for the later APEX app:
+To export the Static Content region and its assets for the later APEX app:
 
 ```bash
 python scripts/build_apex_region.py
 ```
 
-Use the generated `build/apex-region.html` with the two AJAX processes supplied
-by the database integration. The region is a convenience bundle, not a complete
-APEX application export. The same prepared-data labels remain in APEX; live
-OCI embedding and classification are a separate integration milestone.
+Paste `build/apex-region.html` into a Static Content region. Upload the files in
+`build/apex-static/` as Static Application Files, then set the page CSS File URLs
+to `#APP_FILES#app.css` and JavaScript File URLs to `#APP_FILES#app.js`. Keeping
+assets separate avoids the region-source size limit. Add the two AJAX processes
+supplied by the database integration. This is not a complete APEX application
+export. The same prepared-data labels remain in APEX; live OCI embedding and
+classification are a separate integration milestone.

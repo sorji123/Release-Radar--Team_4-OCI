@@ -45,7 +45,7 @@ The demo writes `build/demo-report.json`, with six fictional Northwind Telecom o
 | Offline candidate matching, response validation and JSON report | OCI embeddings and live classification |
 | Six sample configuration types and separate expected labels | Curate 20–30 real Oracle release items and about 25 fictional configurations |
 | Oracle tables, run tracking, candidate query and reporting views | Install and verify on Autonomous Database; implement the analysis writer |
-| Browser dashboard, APEX adapter, fixture API SQL and region bundle | Verify the database package on Oracle and create/export the APEX application |
+| Browser dashboard, APEX adapter, fixture API SQL and region assets | Verify the database package on Oracle and create/export the APEX application |
 | Unit tests and GitHub Actions workflow | Run cloud integration tests in the selected tenancy |
 
 Start with the [development guide](docs/DEVELOPMENT.md), then follow the [database setup](database/README.md) and [APEX page guide](apex/README.md). See [data guidance](data/README.md) before replacing the fixtures.
@@ -214,7 +214,7 @@ The planned 90-second demo follows one breaking finding from the dashboard to it
 | [Release Radar.docx](Release%20Radar.docx) | Original hackathon build plan, architecture, code skeletons, validation checklist, and pitch outline. |
 | [release_radar/](release_radar/) | Python offline demo, candidate matching, prompt builder, and response validation. |
 | [web/](web/) | Responsive dashboard and prepared browser dataset for the live preview. |
-| [scripts/](scripts/) | Build browser demo data and a self-contained APEX region. |
+| [scripts/](scripts/) | Build browser demo data and APEX region markup with separate static assets. |
 | [database/](database/) | Oracle schema, reporting views, candidate query and manual server checks. |
 | [database/demo/](database/demo/) | Future APEX fixture seed, run API, AJAX processes and server smoke checks. |
 | [apex/](apex/) | Page specifications and SQL for run history, dashboard, and finding details. |

@@ -1,6 +1,7 @@
-"""Bundle the tested dashboard into an APEX Static Content region."""
+"""Export APEX region markup and separate Static Application Files."""
 
 import argparse
+import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -13,11 +14,9 @@ def build_region(web_dir: Path) -> str:
     if page.count(START) != 1 or page.count(END) != 1:
         raise ValueError("The page must contain exactly one pair of APEX app markers")
     app = page.split(START, 1)[1].split(END, 1)[0].strip()
-    css = (web_dir / "app.css").read_text(encoding="utf-8")
-    javascript = (web_dir / "app.js").read_text(encoding="utf-8")
-    if "</style" in css.lower() or "</script" in javascript.lower():
-        raise ValueError("Inline bundle contains an unsafe closing tag")
-    return f"<style>\n{css}\n</style>\n{app}\n<script>\n{javascript}\n</script>\n"
+    if len(app.encode("utf-8")) > 32767:
+        raise ValueError("Region markup exceeds the conservative 32767-byte source limit")
+    return app + "\n"
 
 
 def main() -> None:
@@ -27,7 +26,13 @@ def main() -> None:
     content = build_region(ROOT / "web")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(content, encoding="utf-8")
+    assets = args.output.parent / "apex-static"
+    assets.mkdir(parents=True, exist_ok=True)
+    for name in ("app.css", "app.js"):
+        shutil.copyfile(ROOT / "web" / name, assets / name)
     print(f"APEX Static Content region: {args.output}")
+    print(f"Upload Static Application Files from: {assets}")
+    print("Set page CSS File URLs to #APP_FILES#app.css and JavaScript File URLs to #APP_FILES#app.js")
 
 
 if __name__ == "__main__":
