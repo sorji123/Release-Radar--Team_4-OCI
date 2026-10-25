@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7f4">
+  <title>Release Radar | Release impact workspace</title>
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body class="rr-app">
+  <!-- APEX: paste this root element into a Static Content region. Load app.css
+       as a page CSS file and app.js as a page JavaScript file. No nested form. -->
+  <!-- RELEASE_RADAR_APP_START -->
+  <div id="release-radar-root" class="rr-app">
+    <a class="rr-skip" href="#rr-workspace">Skip to workspace</a>
+    <header class="rr-header">
+      <a class="rr-brand" href="#rr-workspace" aria-label="Release Radar home">
+        <svg class="rr-brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="12" fill="currentColor"/><circle cx="20" cy="20" r="10" stroke="#fff" stroke-width="1.5" opacity=".55"/><path d="M20 20 28 12M20 20h-8" stroke="#fff" stroke-width="2" stroke-linecap="round"/><circle cx="20" cy="20" r="2.5" fill="#fff"/><circle cx="28" cy="12" r="2" fill="#fff"/></svg>
+        <span>Release Radar<small>RELEASE READINESS</small></span>
+      </a>
+      <nav class="rr-nav" aria-label="Release Radar navigation">
+        <a class="rr-nav-active" href="#rr-workspace">Overview</a>
+        <a href="#rr-findings">Findings</a>
+        <a href="#rr-history">Run history</a>
+      </nav>
+      <span class="rr-header-label"><span class="rr-dot"></span> Workspace preview</span>
+    </header>
+
+    <main id="rr-workspace" class="rr-main" tabindex="-1">
+      <div class="rr-page-heading">
+        <div><p class="rr-eyebrow">WORKSPACE / RELEASE IMPACT</p><h1>Release readiness, clearly in view.</h1><p class="rr-subtitle">See where a release meets your configuration, why it matters, and what to test next.</p></div>
+        <span id="rr-environment" class="rr-environment">Connecting…</span>
+      </div>
+
+      <div class="rr-demo-notice">
+        <span class="rr-notice-icon" aria-hidden="true">i</span>
+        <p><strong>Illustrative demo</strong><span id="rr-mode-note"> Prepared findings and test cases. This demo does not call live AI.</span></p>
+        <span class="rr-fixture-tag">SYNTHETIC DATA</span>
+      </div>
+
+      <section class="rr-card rr-controls" aria-labelledby="rr-scope-title">
+        <div class="rr-scope-heading"><div><p class="rr-eyebrow">ANALYSIS SCOPE</p><h2 id="rr-scope-title">Choose what to review</h2><p>Select a customer and release to open the prepared analysis.</p></div></div>
+        <div class="rr-field"><label for="rr-customer">Customer</label><select id="rr-customer" disabled><option>Loading customers…</option></select></div>
+        <div class="rr-field"><label for="rr-release">Target release</label><select id="rr-release" disabled><option>Loading releases…</option></select></div>
+        <button id="rr-run" class="rr-button rr-button-primary" type="button" disabled><span aria-hidden="true">▷</span><span id="rr-run-label">Run prepared demo</span></button>
+      </section>
+
+      <div id="rr-error" class="rr-error" role="alert" hidden><div><strong>We couldn’t complete that request.</strong><p id="rr-error-message"></p></div><button id="rr-retry" class="rr-button rr-button-secondary" type="button">Try again</button></div>
+      <p id="rr-status" class="rr-status" role="status" aria-live="polite">Loading the prepared workspace…</p>
+
+      <section class="rr-kpis" aria-label="Report summary">
+        <article class="rr-card rr-kpi"><div class="rr-kpi-label">Objects reviewed</div><strong id="rr-kpi-objects">—</strong><p id="rr-kpi-features">Awaiting a report</p></article>
+        <article class="rr-card rr-kpi rr-kpi-breaking"><div class="rr-kpi-label"><span class="rr-severity-dot" aria-hidden="true"></span> Breaking</div><strong id="rr-kpi-breaking">—</strong><p>Review first</p></article>
+        <article class="rr-card rr-kpi rr-kpi-test"><div class="rr-kpi-label"><span class="rr-severity-dot" aria-hidden="true"></span> Needs testing</div><strong id="rr-kpi-test">—</strong><p>Validate behavior</p></article>
+        <article class="rr-card rr-kpi rr-kpi-opportunity"><div class="rr-kpi-label"><span class="rr-severity-dot" aria-hidden="true"></span> Opportunities</div><strong id="rr-kpi-opportunity">—</strong><p>Explore when ready</p></article>
+        <article class="rr-card rr-kpi"><div class="rr-kpi-label">Without findings</div><strong id="rr-kpi-clear">—</strong><p>Objects with no flagged match</p></article>
+      </section>
+
+      <section id="rr-findings" class="rr-results" aria-labelledby="rr-results-title" aria-busy="true">
+        <div class="rr-section-heading"><div class="rr-section-title"><div><p class="rr-eyebrow">PRIORITIZED REVIEW</p><h2 id="rr-results-title">Release impact</h2><p id="rr-report-meta">Choose a scope to begin your review.</p></div></div><div class="rr-report-actions"><button id="rr-download" class="rr-button rr-button-secondary" type="button" disabled><span aria-hidden="true">↓</span> Download JSON</button><button id="rr-print" class="rr-button rr-button-secondary" type="button" disabled>Print summary</button></div></div>
+        <div class="rr-review-grid">
+          <section class="rr-card rr-findings-panel" aria-label="Ranked findings">
+            <div class="rr-list-header"><h3>Ranked findings <span id="rr-finding-total" class="rr-count">0</span></h3><span>Highest impact first</span></div>
+            <div class="rr-filter-area"><div class="rr-search"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="1.7"/><path d="m16 16 4 4" stroke="currentColor" stroke-width="1.7"/></svg><label class="rr-sr-only" for="rr-search">Search findings by object, module, or release feature</label><input id="rr-search" type="search" placeholder="Search objects, features, modules…" autocomplete="off"></div>
+              <div class="rr-filters" role="group" aria-label="Filter by severity"><button class="rr-filter rr-filter-active" data-severity="ALL" aria-pressed="true" type="button">All <span data-count="ALL">0</span></button><button class="rr-filter" data-severity="BREAKING" aria-pressed="false" type="button">Breaking <span data-count="BREAKING">0</span></button><button class="rr-filter" data-severity="TEST" aria-pressed="false" type="button">Needs testing <span data-count="TEST">0</span></button><button class="rr-filter" data-severity="OPPORTUNITY" aria-pressed="false" type="button">Opportunity <span data-count="OPPORTUNITY">0</span></button></div>
+            </div>
+            <p id="rr-result-count" class="rr-result-count" role="status" aria-live="polite">Waiting for report</p>
+            <div id="rr-finding-list" class="rr-finding-list"><div class="rr-empty"><span class="rr-empty-symbol" aria-hidden="true">◎</span><h3>Your review starts here</h3><p>Run the prepared demo to see configuration matches, release evidence, and test steps.</p></div></div>
+          </section>
+          <section id="rr-detail" class="rr-card rr-detail" aria-labelledby="rr-detail-title"><div class="rr-empty rr-detail-empty"><span class="rr-empty-symbol" aria-hidden="true">↗</span><p class="rr-eyebrow">FROM CHANGE TO ACTION</p><h3 id="rr-detail-title">Every finding tells the whole story.</h3><p>Select a finding to compare your configuration with release evidence and review a regression test.</p><div class="rr-empty-steps"><span>01 &nbsp; Configuration</span><span>02 &nbsp; Evidence</span><span>03 &nbsp; Test plan</span></div></div></section>
+        </div>
+      </section>
+
+      <section id="rr-history" class="rr-card rr-history" aria-labelledby="rr-history-title"><details><summary><span><span id="rr-history-title">Run history</span><span id="rr-history-count" class="rr-count">0</span></span><span class="rr-history-hint" id="rr-history-hint">Session activity</span></summary><div class="rr-history-body"><p id="rr-history-note">Previous runs appear here.</p><div id="rr-history-list"></div></div></details></section>
+      <footer class="rr-footer"><span><strong>Release Radar</strong> <span class="rr-footer-divider">/</span> Evidence before action.</span><span>Illustrative data · Review before action</span></footer>
+      <noscript><p class="rr-error">JavaScript is required to load the Release Radar workspace.</p></noscript>
+    </main>
+  </div>
+  <!-- RELEASE_RADAR_APP_END -->
+  <script src="./app.js" defer></script>
+</body>
+</html>

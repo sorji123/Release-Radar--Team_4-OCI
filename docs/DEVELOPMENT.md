@@ -1,5 +1,10 @@
 # Development guide
 
+The current feature branch includes the interactive browser prototype. Follow
+[the demo guide](DEMO.md) to run the dashboard or show the GitHub Pages preview.
+Direct APEX deployment is deferred; the database fixture API is ready for
+target-server verification, and the browser includes its AJAX adapter.
+
 The starter follows the backend plan in the README and `Release Radar.docx`:
 Autonomous Database owns persistent data and OCI Generative AI supplies
 embeddings and classification. **Oracle APEX is the selected application

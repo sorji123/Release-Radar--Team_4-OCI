@@ -7,11 +7,15 @@ run form, dashboard, finding evidence and regression tests.
 
 ## Current state
 
-The repository includes database setup scripts, APEX region SQL and page
-specifications, a versioned classification prompt, and an offline Python
-fixture harness. A deployed APEX app, live model integration and an executable
-analysis entry point are still to be built. The Python CLI is a development
-tool and a starting point for the document's fallback integration path.
+Direct APEX deployment is deferred while development proceeds in GitHub. The
+browser prototype is published as a temporary GitHub Pages preview; see
+[the demo guide](DEMO.md). This does not change the planned APEX platform.
+
+The repository includes a responsive dashboard, database setup scripts,
+prepared-data API package and APEX AJAX snippets, a versioned classification
+prompt, and an offline Python fixture harness. The package has not been
+compiled on Oracle. A deployed APEX app and live model integration still need
+to be built and verified.
 
 ## Deployment sequence
 

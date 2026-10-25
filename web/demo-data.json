@@ -1,0 +1,251 @@
+{
+  "schema_version": 1,
+  "mode": "FIXTURE",
+  "notice": "Synthetic data, hand-authored vectors and responses. Not Oracle release guidance or AI accuracy results.",
+  "customers": [
+    "Northwind Telecom"
+  ],
+  "releases": [
+    {
+      "code": "DEMO",
+      "label": "Demo release"
+    }
+  ],
+  "runs": [
+    {
+      "id": "c97b0ee0-7c42-4131-bb56-ae7a2942bfea",
+      "status": "COMPLETED",
+      "started_at": "2026-10-25T22:32:28.235461+00:00",
+      "customer": "Northwind Telecom",
+      "release_code": "DEMO",
+      "summary": {
+        "objects_checked": 6,
+        "release_features": 4,
+        "candidate_pairs": 4,
+        "findings_by_severity": {
+          "BREAKING": 1,
+          "TEST": 1,
+          "OPPORTUNITY": 1
+        },
+        "objects_with_findings": 3,
+        "objects_without_findings": 3
+      }
+    }
+  ],
+  "report": {
+    "schema_version": 1,
+    "run_id": "c97b0ee0-7c42-4131-bb56-ae7a2942bfea",
+    "status": "COMPLETED",
+    "mode": "FIXTURE",
+    "notice": "Synthetic data, hand-authored vectors and responses. Not Oracle release guidance or AI accuracy results.",
+    "customer": "Northwind Telecom",
+    "release_code": "DEMO",
+    "prompt_version": "impact-v1",
+    "embedding_model": "fixture-4d",
+    "chat_model": "fixture-responses",
+    "top_k": 3,
+    "threshold": 0.6,
+    "started_at": "2026-10-25T22:32:28.235461+00:00",
+    "completed_at": "2026-10-25T22:32:28.235846+00:00",
+    "summary": {
+      "objects_checked": 6,
+      "release_features": 4,
+      "candidate_pairs": 4,
+      "findings_by_severity": {
+        "BREAKING": 1,
+        "TEST": 1,
+        "OPPORTUNITY": 1
+      },
+      "objects_with_findings": 3,
+      "objects_without_findings": 3
+    },
+    "findings": [
+      {
+        "object_key": "nw-account-sync",
+        "object_name": "Nightly account sync to billing",
+        "object_type": "OIC",
+        "snippet": "GET /legacy/accounts",
+        "feature_key": "demo-account-api",
+        "feature_title": "Synthetic example: legacy account endpoint retirement",
+        "source_url": "https://example.invalid/release-radar/demo/account-api",
+        "source_kind": "SYNTHETIC",
+        "distance": 0.0,
+        "severity": "BREAKING",
+        "confidence": 99,
+        "rationale": "The fictional integration calls the exact endpoint that the synthetic release removes. Update the integration before upgrading.",
+        "cited_text": "the /legacy/accounts endpoint is removed",
+        "test_case": {
+          "title": "Verify account sync after endpoint migration",
+          "steps": [
+            "Point a test copy of the integration at /v2/accounts.",
+            "Run a sync with a known test account.",
+            "Compare the resulting billing record with the source account."
+          ],
+          "expected": "The integration completes and the billing record matches the test account."
+        },
+        "module": "Sales",
+        "object_description": "A fictional integration reads the legacy accounts endpoint each night and sends account updates to billing.",
+        "feature_description": "In this fictional release, the /legacy/accounts endpoint is removed. Account integrations must use /v2/accounts before upgrading.",
+        "opt_in": "N"
+      },
+      {
+        "object_key": "nw-backlog-report",
+        "object_name": "Weekly service request backlog",
+        "object_type": "REPORT",
+        "snippet": "Subject area: Service Backlog; measures: open request count",
+        "feature_key": "demo-backlog-report",
+        "feature_title": "Synthetic example: service backlog report grouping",
+        "source_url": "https://example.invalid/release-radar/demo/backlog-report",
+        "source_kind": "SYNTHETIC",
+        "distance": 0.0,
+        "severity": "TEST",
+        "confidence": 85,
+        "rationale": "The fictional report uses the affected subject area. The release preserves columns, so verify aggregation behavior without assuming breakage.",
+        "cited_text": "verify totals when using queue grouping",
+        "test_case": {
+          "title": "Compare service backlog totals",
+          "steps": [
+            "Record totals for a fixed set of service requests.",
+            "Run the report after the update with and without queue grouping.",
+            "Reconcile both totals against the fixed input set."
+          ],
+          "expected": "Grouped and ungrouped totals match the known service request count."
+        },
+        "module": "Service",
+        "object_description": "A fictional report aggregates service backlog counts and exports totals for operations.",
+        "feature_description": "In this fictional release, the service backlog subject area gains an optional queue grouping column. Existing report columns remain available; verify totals when using queue grouping.",
+        "opt_in": "N"
+      },
+      {
+        "object_key": "nw-summary-field",
+        "object_name": "Manual service request summary field",
+        "object_type": "APP_COMPOSER",
+        "snippet": "Custom field: ManualSummary_c",
+        "feature_key": "demo-service-summary",
+        "feature_title": "Synthetic example: optional service request summaries",
+        "source_url": "https://example.invalid/release-radar/demo/service-summary",
+        "source_kind": "SYNTHETIC",
+        "distance": 0.0,
+        "severity": "OPPORTUNITY",
+        "confidence": 90,
+        "rationale": "The optional fictional feature may replace manual summary drafting. An agent should compare its output with the current process before adoption.",
+        "cited_text": "administrators can opt in to automatic service request summaries",
+        "test_case": {
+          "title": "Evaluate automatic summaries against manual summaries",
+          "steps": [
+            "Enable the optional feature in a test environment.",
+            "Generate a summary for a sample request with known notes.",
+            "Have an agent compare it with the manually maintained summary."
+          ],
+          "expected": "The agent can review a draft containing the important facts from the sample request notes."
+        },
+        "module": "Service",
+        "object_description": "Agents manually copy service request notes into a custom summary field.",
+        "feature_description": "In this fictional release, administrators can opt in to automatic service request summaries. The feature drafts a summary from service request notes for an agent to review.",
+        "opt_in": "Y"
+      }
+    ],
+    "decisions": [
+      {
+        "object_key": "nw-account-sync",
+        "object_name": "Nightly account sync to billing",
+        "object_type": "OIC",
+        "snippet": "GET /legacy/accounts",
+        "feature_key": "demo-account-api",
+        "feature_title": "Synthetic example: legacy account endpoint retirement",
+        "source_url": "https://example.invalid/release-radar/demo/account-api",
+        "source_kind": "SYNTHETIC",
+        "distance": 0.0,
+        "severity": "BREAKING",
+        "confidence": 99,
+        "rationale": "The fictional integration calls the exact endpoint that the synthetic release removes. Update the integration before upgrading.",
+        "cited_text": "the /legacy/accounts endpoint is removed",
+        "test_case": {
+          "title": "Verify account sync after endpoint migration",
+          "steps": [
+            "Point a test copy of the integration at /v2/accounts.",
+            "Run a sync with a known test account.",
+            "Compare the resulting billing record with the source account."
+          ],
+          "expected": "The integration completes and the billing record matches the test account."
+        },
+        "module": "Sales",
+        "object_description": "A fictional integration reads the legacy accounts endpoint each night and sends account updates to billing.",
+        "feature_description": "In this fictional release, the /legacy/accounts endpoint is removed. Account integrations must use /v2/accounts before upgrading.",
+        "opt_in": "N"
+      },
+      {
+        "object_key": "nw-backlog-report",
+        "object_name": "Weekly service request backlog",
+        "object_type": "REPORT",
+        "snippet": "Subject area: Service Backlog; measures: open request count",
+        "feature_key": "demo-backlog-report",
+        "feature_title": "Synthetic example: service backlog report grouping",
+        "source_url": "https://example.invalid/release-radar/demo/backlog-report",
+        "source_kind": "SYNTHETIC",
+        "distance": 0.0,
+        "severity": "TEST",
+        "confidence": 85,
+        "rationale": "The fictional report uses the affected subject area. The release preserves columns, so verify aggregation behavior without assuming breakage.",
+        "cited_text": "verify totals when using queue grouping",
+        "test_case": {
+          "title": "Compare service backlog totals",
+          "steps": [
+            "Record totals for a fixed set of service requests.",
+            "Run the report after the update with and without queue grouping.",
+            "Reconcile both totals against the fixed input set."
+          ],
+          "expected": "Grouped and ungrouped totals match the known service request count."
+        },
+        "module": "Service",
+        "object_description": "A fictional report aggregates service backlog counts and exports totals for operations.",
+        "feature_description": "In this fictional release, the service backlog subject area gains an optional queue grouping column. Existing report columns remain available; verify totals when using queue grouping.",
+        "opt_in": "N"
+      },
+      {
+        "object_key": "nw-summary-field",
+        "object_name": "Manual service request summary field",
+        "object_type": "APP_COMPOSER",
+        "snippet": "Custom field: ManualSummary_c",
+        "feature_key": "demo-service-summary",
+        "feature_title": "Synthetic example: optional service request summaries",
+        "source_url": "https://example.invalid/release-radar/demo/service-summary",
+        "source_kind": "SYNTHETIC",
+        "distance": 0.0,
+        "severity": "OPPORTUNITY",
+        "confidence": 90,
+        "rationale": "The optional fictional feature may replace manual summary drafting. An agent should compare its output with the current process before adoption.",
+        "cited_text": "administrators can opt in to automatic service request summaries",
+        "test_case": {
+          "title": "Evaluate automatic summaries against manual summaries",
+          "steps": [
+            "Enable the optional feature in a test environment.",
+            "Generate a summary for a sample request with known notes.",
+            "Have an agent compare it with the manually maintained summary."
+          ],
+          "expected": "The agent can review a draft containing the important facts from the sample request notes."
+        },
+        "module": "Service",
+        "object_description": "Agents manually copy service request notes into a custom summary field.",
+        "feature_description": "In this fictional release, administrators can opt in to automatic service request summaries. The feature drafts a summary from service request notes for an agent to review.",
+        "opt_in": "Y"
+      },
+      {
+        "object_key": "nw-quote-validation",
+        "object_name": "Require signed quote before close",
+        "object_type": "GROOVY",
+        "snippet": "Before closing: require SignedQuote_c = true",
+        "feature_key": "demo-account-api",
+        "feature_title": "Synthetic example: legacy account endpoint retirement",
+        "source_url": "https://example.invalid/release-radar/demo/account-api",
+        "source_kind": "SYNTHETIC",
+        "distance": 0.2,
+        "severity": "NONE",
+        "confidence": 95,
+        "rationale": "The signed-quote validation does not use the account endpoint. The supplied release text does not establish an impact on opportunity validation.",
+        "cited_text": "",
+        "test_case": null
+      }
+    ]
+  }
+}
