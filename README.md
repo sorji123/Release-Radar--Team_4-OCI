@@ -8,9 +8,24 @@ Release Radar is a proposed AI assistant that compares Oracle Fusion Cloud relea
 
 Built for the **AI World Hackathon** by **Team 4**.
 
-**Project status:** Development starter. The repository now includes a runnable offline fixture demo, Oracle schema and query scripts, a classification prompt, validation tests, and an APEX page guide. Live OCI model calls, real release data, the APEX application, and deployment are still to be implemented. The product features below describe the intended MVP.
+**Project status:** Interactive development preview. The browser dashboard supports prepared demo runs, severity filters, search, finding evidence, regression tests, session history, and JSON export. Oracle schema and fixture API scripts are included for the future APEX integration. Live OCI model calls, real release data, and deployment to APEX remain to be implemented and verified. The product features below describe the intended MVP.
 
 **Application platform: Oracle APEX.** The team will build on Autonomous Database and OCI Generative AI, with APEX providing the interface. See the [APEX deployment plan](docs/DEPLOYMENT.md).
+
+## Browser preview
+
+[Open the Release Radar preview](https://sorji123.github.io/Release-Radar--Team_4-OCI/)
+
+The preview is published from the feature branch through GitHub Pages while APEX deployment is deferred. It uses **synthetic data and prepared responses**, makes no live AI calls, and keeps new runs only in the browser session. Select a finding to inspect its configuration, source evidence, and test steps. See the [90-second demo guide](docs/DEMO.md).
+
+To run the same interface locally:
+
+```bash
+python scripts/build_demo_data.py
+python -m http.server 8080 --bind 127.0.0.1 --directory web
+```
+
+Open `http://127.0.0.1:8080`. The web interface uses no build tools or external libraries.
 
 ## Start developing
 
@@ -30,7 +45,7 @@ The demo writes `build/demo-report.json`, with six fictional Northwind Telecom o
 | Offline candidate matching, response validation and JSON report | OCI embeddings and live classification |
 | Six sample configuration types and separate expected labels | Curate 20–30 real Oracle release items and about 25 fictional configurations |
 | Oracle tables, run tracking, candidate query and reporting views | Install and verify on Autonomous Database; implement the analysis writer |
-| APEX report SQL and page specifications | Create/export the APEX application and connect the interface |
+| Browser dashboard, APEX adapter, fixture API SQL and region bundle | Verify the database package on Oracle and create/export the APEX application |
 | Unit tests and GitHub Actions workflow | Run cloud integration tests in the selected tenancy |
 
 Start with the [development guide](docs/DEVELOPMENT.md), then follow the [database setup](database/README.md) and [APEX page guide](apex/README.md). See [data guidance](data/README.md) before replacing the fixtures.
@@ -198,12 +213,17 @@ The planned 90-second demo follows one breaking finding from the dashboard to it
 | [README.md](README.md) | Project overview, planned workflow, scope, and implementation guide. |
 | [Release Radar.docx](Release%20Radar.docx) | Original hackathon build plan, architecture, code skeletons, validation checklist, and pitch outline. |
 | [release_radar/](release_radar/) | Python offline demo, candidate matching, prompt builder, and response validation. |
+| [web/](web/) | Responsive dashboard and prepared browser dataset for the live preview. |
+| [scripts/](scripts/) | Build browser demo data and a self-contained APEX region. |
 | [database/](database/) | Oracle schema, reporting views, candidate query and manual server checks. |
+| [database/demo/](database/demo/) | Future APEX fixture seed, run API, AJAX processes and server smoke checks. |
 | [apex/](apex/) | Page specifications and SQL for run history, dashboard, and finding details. |
 | [data/](data/) | Synthetic fixtures, separate evaluation labels, and real-data preparation guidance. |
 | [prompts/classify.txt](prompts/classify.txt) | Versioned classification contract for the future model integration. |
 | [config/](config/) | OCI embedding parameter example; no credentials. |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | First tasks, architecture boundaries, and acceptance criteria. |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Selected APEX platform and deployment milestones. |
+| [docs/DEMO.md](docs/DEMO.md) | Preview setup, limits and a short team demo walkthrough. |
 | [tests/](tests/) | Offline behavior, failure-path, and data-contract tests. |
 | [.github/workflows/checks.yml](.github/workflows/checks.yml) | Python tests and demo checks for pushes and pull requests. |
+| [.github/workflows/demo-pages.yml](.github/workflows/demo-pages.yml) | Test, build and publish only the public web preview assets. |
