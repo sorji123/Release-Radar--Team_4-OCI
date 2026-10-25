@@ -5,6 +5,7 @@ __pycache__/
 build/
 dist/
 .env
+authApexworkspace
 .env.*
 !.env.example
 .oci/
