@@ -1,53 +1,52 @@
-# APEX deployment plan
+# Deployment
 
-**Selected platform: Oracle APEX.** The application follows the original build
-plan: Autonomous Database stores source data, vectors and analysis results;
-OCI Generative AI supplies embeddings and classifications; APEX presents the
-run form, dashboard, finding evidence and regression tests.
+The current submission is a static browser application on
+[GitHub Pages](https://sorji123.github.io/Release-Radar--Team_4-OCI/#demo).
+No login, backend database, AI service, or API credential is required.
 
-## Current state
+## Public preview
 
-The repository includes a working browser MVP with configuration import,
-reviewed 26D sources, deterministic matching, readable findings and report
-downloads. Install its static assets in APEX using [the MVP guide](MVP.md).
-The local preview's Python server serves public assets and checks Oracle's
-readiness index; customer analysis takes place in the browser.
+`.github/workflows/demo-pages.yml` tests and builds the site on `main` and
+`feature/rubric-readiness`, then deploys `build/site/`. The preview branch
+allows review before merging into main. Pages deployment requires the
+repository's Pages source to be **GitHub Actions**.
 
-The database setup scripts, region SQL, classification prompt and Python
-fixture harness remain the foundation for the future database/OCI pipeline.
-No live OCI model, database-backed analysis writer or full APEX export is
-claimed by this MVP. The deployment sequence below applies to that next stage.
+```bash
+python -m release_radar build-site
+```
 
-## Deployment sequence
+The output contains only `index.html`, the five listed static assets, and
+`.nojekyll`. The build rejects unexpected files in the public output directory.
+The repository root, Financials export, and authentication files are never copied
+into the public artifact. Use a clean build directory for a fresh package.
 
-1. Provision an Autonomous Database supporting the required VECTOR features,
-   create the application schema and APEX workspace, and establish team access.
-2. Apply `database/001_schema.sql` and `database/002_views.sql` in a fresh
-   schema, then run `database/verify.sql` and `database/smoke.sql`. Record the
-   actual server output; these scripts have not been verified on a live Oracle
-   instance as part of this starter.
-3. Configure the database credential and network access for OCI outside Git.
-   Confirm the chosen region/model and verify one embedding call before loading
-   and embedding the real release dataset.
-4. Implement the analysis writer: create a run, match candidates, call the
-   classifier, validate evidence/tests, save decisions and finish or fail the
-   run with accurate counts. Use PL/SQL first, or the Python fallback if needed.
-5. Build the three pages in `apex/README.md`. Configure authentication and
-   customer/run authorization, then connect Run Analysis to the working entry
-   point. Keep source and model text escaped when rendering.
-6. Export the app into `apex/exports/`; document the APEX version and import
-   instructions. Verify the export in a separate development workspace before
-   publishing the demo URL.
+Verify the final Pages run and open `#demo` in a new browser session. Run the
+sample, open evidence, record a decision, and download the action plan. The
+static site shows the catalog verification date; it does not claim to check
+Oracle's release index live.
 
-## First live milestone
+## Local preview
 
-A signed-in demo user selects Northwind Telecom and a release, starts analysis,
-sees a completed or failed run, opens a ranked finding with exact source
-evidence, and reads its regression test. Keep synthetic data visibly labeled.
-Measure the live flow before claiming runtime or detection accuracy.
+`python -m release_radar site` serves only the public allowlist on
+`127.0.0.1:8765`. The optional `/api/release-status` endpoint retrieves Oracle's
+public index without sending inventory content. An unavailable network produces
+a visible snapshot notice. The local server is not an authenticated public service.
 
-Before sharing the app, check the login from another device, confirm invalid
-run IDs reveal no data, and save a pre-run result plus a short backup recording.
-Document the actual environment settings, app ID, deployment commands and
-recovery steps once the first deployment works. Keep keys and database wallets
-outside version control.
+## Optional APEX hosting
+
+The same build writes `build/release-radar-apex-assets.zip`. Follow
+[the MVP guide](MVP.md#add-the-mvp-to-an-apex-application) to load these as Static
+Application Files and use `apex/mvp-region.html` in a Static Content region.
+This uses APEX as a host for the current browser workflow and requires no Oracle
+AI features. Verify layout, import, dialogs, downloads and authentication in the
+actual workspace before claiming an APEX deployment.
+
+No live APEX deployment is included in this submission. The historical database
+and vector prototypes are not prerequisites for running this site.
+
+## Local credentials
+
+`authApexworkspace` is ignored and removed from the tracked branch. If a secret
+was committed previously, deleting the current file does not remove it from
+Git history; the owner must rotate it. Never put credentials or customer data
+in the static asset directory.

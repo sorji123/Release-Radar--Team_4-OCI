@@ -44,4 +44,61 @@ await test('damaged ZIP returns a clear error',async()=>{await assert.rejects(()
 await test('reports distinguish coverage and include sources and tests',()=>{const r=C.analyze(inventory(),catalog);const md=C.reportMarkdown(r);assert.match(md,/not a complete review/);assert.match(md,/Suggested test/);assert.match(md,/https:\/\/docs.oracle.com\//);});
 await test('hostile markup is inert inventory text and escaped in Markdown',()=>{const inv=inventory();inv.objects[0].name='<script>alert(1)</script> [click](https://evil.test)';const report=C.analyze(inv,catalog);const md=C.reportMarkdown(report);assert.ok(!md.includes('<script>'));assert.ok(!md.includes('[click]('));});
 await test('analysis does not mutate imported data',()=>{const inv=inventory(),before=JSON.stringify(inv);C.analyze(inv,catalog);assert.equal(JSON.stringify(inv),before);});
+await test('recording a decision requires a real finding and explicit evidence',()=>{
+  const report=C.analyze(inventory(),catalog),id=report.findings[0].id;
+  assert.throws(()=>C.updateDecision(report,'missing',{status:'OPEN'}),/no longer/);
+  assert.throws(()=>C.updateDecision(report,id,{status:'SAFE'}),/valid review/);
+  for(const status of ['VERIFIED','NOT_APPLICABLE'])assert.throws(()=>C.updateDecision(report,id,{status,note:' '}),/evidence or a reason/);
+  const changed=C.updateDecision(report,id,{status:'ACTION_PLANNED',owner:' QA team ',note:'Test both role assignments.'});
+  assert.equal(C.decisionFor(changed,id).owner,'QA team');
+  assert.equal(C.decisionFor(report,id).status,'OPEN');
+  assert.match(C.reportMarkdown(changed),/Test both role assignments/);
+  assert.match(C.actionPlanCsv(changed),/Action planned/);
+});
+await test('review notes and owners enforce length limits',()=>{
+  const report=C.analyze(inventory(),catalog),id=report.findings[0].id;
+  assert.throws(()=>C.updateDecision(report,id,{status:'OPEN',owner:'x'.repeat(121)}),/120/);
+  assert.throws(()=>C.updateDecision(report,id,{status:'OPEN',note:'x'.repeat(2001)}),/2,000/);
+});
+await test('CSV exports escape quotes, multiline notes, and formula prefixes',()=>{
+  const report=C.analyze(inventory(),catalog),id=report.findings[0].id;
+  const changed=C.updateDecision(report,id,{status:'VERIFIED',owner:'=HYPERLINK("x")',note:'Checked "A"\nwith test role.'});
+  const rows=C.csvRows(C.actionPlanCsv(changed).replace(/^\uFEFF/,''));
+  assert.equal(rows[0].Owner,"'"+'=HYPERLINK("x")');
+  assert.equal(rows[0]['Review note'],'Checked "A"\nwith test role.');
+  assert.equal(rows[0]['Review status'],'Verified by reviewer');
+});
+await test('action plan keeps unmatched objects visible for manual review',()=>{
+  const report=C.analyze(C.normalize(sample,'sample.json'),catalog);
+  const rows=C.csvRows(C.actionPlanCsv(report).replace(/^\uFEFF/,''));
+  assert.equal(rows.length,report.findings.length+report.unmatched.length);
+  assert.equal(rows.filter(r=>r.Category==='MANUAL_REVIEW').length,2);
+  assert.ok(report.matching_ms>=0);
+});
+await test('older release index is not labeled a newer quarter',()=>{
+  assert.equal(C.isNewerRelease('26C','26D'),false);
+  assert.equal(C.isNewerRelease('26D','26D'),false);
+  assert.equal(C.isNewerRelease('27A','26D'),true);
+  assert.throws(()=>C.isNewerRelease('latest','26D'),/Invalid release/);
+});
+await test('native setup definitions retain uncertainty and do not infer customization status',()=>{
+  const inv=C.parseText('ProfileOptionName,UserProfileOptionName,Description,ApplicationId\nABC,Example option,Example setting,100\n','FND_APP_PROFILE_OPTION.csv');
+  assert.equal(inv.import_kind,'NATIVE_SETUP');
+  assert.equal(inv.objects[0].object_type,'SETUP');
+  assert.equal(inv.objects[0].module,'Unspecified');
+  assert.match(inv.warnings[0],/not inferred/);
+  assert.equal(C.analyze(inv,catalog).findings.length,0);
+});
+await test('empty native tables are supported but malformed identities fail',()=>{
+  assert.equal(C.parseText('ProfileOptionName,Description\n','FND_APP_PROFILE_OPTION.csv').objects.length,0);
+  assert.throws(()=>C.parseText('ProfileOptionName,Description\n,Missing identity\n','FND_APP_PROFILE_OPTION.csv'),/needs ProfileOptionName/);
+});
+await test('the repository Financials export is readable as a bounded native setup preview',async()=>{
+  const data=await readFile(new URL('../../Financials_CSV_20261025_102916_752.zip',import.meta.url));
+  const inv=await C.parseFile({name:'Financials.zip',size:data.length,arrayBuffer:async()=>data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength)});
+  assert.equal(inv.import_kind,'NATIVE_SETUP');assert.ok(inv.objects.length>0&&inv.objects.length<=1000);
+  assert.equal(inv.files.length,4);assert.ok(inv.warnings.some(w=>w.includes('skipped')));
+  assert.ok(inv.objects.every(o=>o.object_type==='SETUP'));
+  assert.equal(C.analyze(inv,catalog).unmatched.length,inv.objects.length);
+});
 console.log(`${results.length} browser-core checks passed.`);

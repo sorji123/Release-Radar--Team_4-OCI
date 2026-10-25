@@ -1,126 +1,75 @@
 # Development guide
 
-For the initial website, run `python3 -m release_radar site` and follow
-[the MVP guide](MVP.md). The new browser importer and rule-based review are
-independent of the synthetic Python pipeline below. Browser logic lives in
-`web/rr-core.js`; run `node tests/web/core.test.mjs` for its checks. Python
-website packaging and public readiness checking live in `release_radar/site.py`.
-
-The starter follows the backend plan in the README and `Release Radar.docx`:
-Autonomous Database owns persistent data and OCI Generative AI supplies
-embeddings and classification. **Oracle APEX is the selected application
-platform**, following the original build plan.
-The Python package includes the original offline harness and a local static-site
-preview. It does not yet connect to an Oracle database or make OCI model calls.
+The current product is a static browser application with deterministic review
+rules. It does not use OCI Generative AI or other Oracle AI integrations.
+The original Python classification harness and database scripts are separate
+prototype resources, not the runtime behind the public website.
 
 ## Work locally
 
-With Python 3.11+ installed, run from the repository root:
-
 ```bash
-python -m release_radar demo
+python -m release_radar site
 python -m unittest discover -s tests -v
+node tests/web/core.test.mjs
+node scripts/benchmark_web.mjs --output build/benchmark.json
+python -m release_radar build-site
 ```
 
-No package installation is needed. `pyproject.toml` records project metadata;
-the demo is currently supported from a source checkout, not a standalone wheel.
-The report is written to ignored `build/demo-report.json`. An optional path is:
+Use Python 3.11+ and Node 24. No third-party packages are needed.
+The site runs at `http://127.0.0.1:8765`. Browser checks cover parsing, limits,
+matching, real-export compatibility, review decisions, and safe CSV/Markdown
+exports. Python checks cover source validation, public packaging, the local
+server allowlist, and the separate synthetic harness.
 
-```bash
-python -m release_radar demo --output build/my-report.json
-```
+## Code boundaries
 
-The harness filters by customer/release/module, computes cosine distance over
-hand-authored vectors, takes at most three candidates below distance 0.60,
-retrieves fixture responses, validates them, and emits ranked findings. Every
-run has a UUID, UTC timestamps, fixture provenance, settings, summary counts,
-all classified decisions (including `NONE`), and actionable findings.
-
-The local UUID is an artifact identifier, not the numeric `analysis_runs.run_id`.
-A future Oracle writer must create its own identity row and map stable
-`object_key`/`feature_key` identifiers to database IDs. The local summary names
-`release_features` and `candidate_pairs` map to database `features_considered`
-and `candidates_selected`; `threshold` maps to `distance_threshold`.
-
-The local CLI writes a report only after success, exits nonzero on bad input,
-and leaves any previous report unchanged on an analysis error. It does not
-persist failed runs. The database writer must implement that lifecycle.
-
-## Useful code boundaries
-
-| Location | Responsibility |
+| File | Responsibility |
 | --- | --- |
-| `contracts.py` | Dataset fields, strict JSON, category/confidence ranges, source citation and test validation |
-| `pipeline.py:select_candidates` | Retrieval semantics tested against hand-authored vectors |
-| `pipeline.py:Classifier` | Small interface a future OCI adapter can implement |
-| `pipeline.py:build_prompt` | Source-only inputs using `prompts/classify.txt`; evaluation labels excluded |
-| `pipeline.py:run_demo` | Fixture-only orchestration; intentionally refuses real release data |
-| `database/candidates.sql` | Equivalent retrieval on Oracle's stored vectors |
-| `database/002_views.sql` | APEX reporting contract and severity ranking |
+| `web/rr-core.js` | Pure import, rule matching, human-decision validation, report formatting |
+| `web/rr-app.js` | Navigation, dialogs, upload state, demo guide and browser interactions |
+| `web/rr-style.css` | Responsive visual system and focus states |
+| `web/rr-data.js` | Generated catalog and sample payload; do not edit directly |
+| `data/releases/26D.json` | Source-linked feature catalog, matching terms and suggested tests |
+| `release_radar/site.py` | Build validation, static output and optional public readiness check |
 
-The demo does not send prompts to an LLM; the prompt builder is tested separately
-for the next integration. Validate live responses through `validate_response`
-before persistence. It rejects prose/fences rather than silently extracting a
-JSON-looking fragment. The future caller can retry a failed response once with
-a repair instruction, then record a failed run. A quoted phrase passing
-validation is evidence of grounding, not proof of the semantic verdict.
+Maintain a new source with its actual release, exact URL, a short verified
+excerpt, activation conditions, an actionable test and a known expected result.
+Do not rename old notes to a newer quarter. Verify with
+`python scripts/verify_release_sources.py`, rebuild, and add independent cases
+that test both relevance and false positives.
 
-## First development tasks
+## State and import rules
 
-These tasks can be assigned to separate teammates. Follow the
-[APEX deployment plan](DEPLOYMENT.md) for the application milestones.
+- Imports remain in memory. A failed replacement keeps the previous inventory
+  and review. A successful replacement clears the old report.
+- The sample is fictional and stays labeled. Native setup previews do not
+  assert custom status, module ownership, or impact.
+- Verified/not-applicable decisions require a reviewer note. The UI cannot
+  automatically verify a suggested test.
+- Every export contains the complete report, including unmatched objects.
+  CSV cells are quoted and formula prefixes neutralized.
+- Navigation uses browser history and supports `#demo`, `#overview`,
+  `#configuration`, `#review`, and `#sources`.
 
-1. **Database foundation.** Provision the development schema, apply the scripts
-   in `database/README.md`, and run `verify.sql` and `smoke.sql`. Record the actual
-   database version and successful output. The SQL has not been run against a
-   live Oracle instance as part of this starter.
-2. **Data preparation.** Follow `data/README.md`; curate official release text
-   with URLs and opt-in flags. Create the rest of Northwind's fictional objects
-   and keep expected outcomes in a separate evaluation dataset. Start a loader
-   that validates scope and maps stable keys to Oracle IDs.
-3. **OCI integration.** Confirm region, model availability and vector dimension.
-   Store credentials outside Git. Verify one embedding using
-   `config/oci-embedding.example.json` and Oracle's documented APIs. Generate
-   both datasets' embeddings with a compatible model/input recipe. Implement
-   the PL/SQL route first, or a Python OCI SDK adapter if that blocks progress.
-4. **Analysis writer.** Create a `RUNNING` analysis row; fetch scoped candidates;
-   construct prompts; validate JSON, citations and tests; persist decisions;
-   update counts and terminal status. Treat empty candidate sets as valid,
-   reject incomplete embedding coverage, and record the actual model, prompt,
-   top-k and threshold. Specify transaction and retry behavior before wiring UI.
-5. **APEX application.** Build the three pages in `apex/README.md` and export
-   the application into `apex/exports/`. Connect Run only after an executable
-   analysis entry point exists.
+## Performance and validation
 
-The initial schema fixes vector dimension at 1024 to match the build plan.
-If the chosen model returns another dimension, review and change both columns
-before the first install or add an explicit migration to an existing schema.
-Never put the demo's four-dimensional vectors into the Oracle tables.
+The benchmark performs one warmup and 25 measured matching runs at 8, 250,
+and 1,000 objects. CI requires p95 below 1,000 ms at 1,000 objects against the
+11-note catalog. This budget excludes import, rendering, network, human work
+and execution of the suggested tests. Keep the scope visible when citing it.
 
-## First live milestone
+Before sharing, exercise upload, sample review, a source link, a review
+decision, exports, an invalid replacement, browser Back, and mobile layout.
+Verify the live URL after Pages deployment succeeds.
 
-- A customer and release can be selected in the APEX application.
-- A real analysis run finishes as `COMPLETED` or `FAILED`, with accurate counts.
-- The dashboard distinguishes finding counts from distinct affected objects.
-- Every actionable finding contains a source URL, exact supporting text, a
-  rationale, and an executable regression test for a human to review.
-- `NONE` decisions remain auditable without appearing as risks; no finding
-  does not establish that an object is safe.
-- Planted examples and unrelated objects are checked independently; publish
-  measured results only after live-model evaluation.
+## Next development proof
 
-## Team workflow
+1. Have domain reviewers label independent inventories before tuning rules.
+2. Measure precision, missed changes and reviewer corrections.
+3. Broaden real release coverage only with reviewed sources and regression cases.
+4. Extend native export mapping with explicit semantics and customization flags.
+5. Run pilots to measure time to an accepted test plan and willingness to pay.
 
-Use a branch per task and keep schema migrations additive after the baseline
-is installed. Run the unit tests before a pull request; GitHub Actions repeats
-them on Python 3.11 and 3.13. Do not commit local reports, OCI keys, wallets or
-customer exports. Update this guide when interfaces or setup commands change.
-
-## Official API references
-
-- [Oracle vector distance](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/vector_distance.html)
-- [DBMS_VECTOR embedding parameters](https://docs.oracle.com/en/database/oracle/oracle-database/26/vecse/utl_to_embedding-and-utl_to_embeddings-dbms_vector.html)
-
-Model names in the original document are examples. Verify availability in the
-chosen tenancy before using them; this starter does not assert that a particular
-model is deployed or available in a region.
+The synthetic `python -m release_radar demo` command remains available to
+exercise the original candidate/citation contracts. Its vectors and outputs
+are fixtures and do not demonstrate model performance.

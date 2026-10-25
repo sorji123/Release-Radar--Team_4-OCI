@@ -14,15 +14,10 @@ jobs:
       matrix:
         python-version: ['3.11', '3.13']
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.1.0
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Validate browser import and review behavior
-        run: node tests/web/core.test.mjs
       - name: Test contracts and offline pipeline
         run: python -m unittest discover -s tests -v
       - name: Run synthetic demo
@@ -33,3 +28,15 @@ jobs:
           git diff --exit-code -- web/rr-data.js
       - name: Check whitespace
         run: git diff --check
+
+  browser-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '24'
+      - name: Test importer, matching, and review handoff
+        run: node tests/web/core.test.mjs
+      - name: Measure matching performance
+        run: node scripts/benchmark_web.mjs --output build/benchmark.json

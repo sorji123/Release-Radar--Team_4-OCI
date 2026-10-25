@@ -20,3 +20,34 @@
 .rr-app td small,.rr-app .rr-dialog p,.rr-app .rr-dialog-subtitle,.rr-app .rr-test-plan ol,.rr-app .rr-dialog section>ul,.rr-app .rr-match-reason,.rr-app .rr-unmatched p,.rr-app .rr-side-note p,.rr-app .rr-nav-label,.rr-app .rr-footer,.rr-app .rr-filters button,.rr-app .rr-unmatched summary>span{color:#60735a}
 .rr-app .rr-finding-body>small,.rr-app td small{font-size:12px}.rr-app .rr-metric small,.rr-app .rr-finding-meta,.rr-app .rr-dropzone small,.rr-app .rr-sample-button small{font-size:11px}
 .rr-app .rr-badge.rr-review{color:#895b13}.rr-app .rr-badge.rr-test{color:#526498}.rr-app .rr-badge.rr-opportunity{color:#4e723c}
+
+/* Review handoff and the public demonstration guide. */
+#release-radar .rr-review-progress{padding:14px 18px;border:1px solid #d5e2d5;background:#edf5ed;border-radius:8px;color:#385c45;font-size:13px;margin-bottom:20px}
+#release-radar .rr-decision{border-top:1px solid var(--rr-line);padding-top:24px}
+#release-radar .rr-decision-fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#release-radar .rr-decision label{display:block;font-size:12px;font-weight:600;color:#3d5743;margin-bottom:16px}
+#release-radar .rr-decision input,#release-radar .rr-decision select,#release-radar .rr-decision textarea{display:block;width:100%;min-width:0;font-family:inherit;font-size:14px;line-height:1.5;color:#233a34;background:white;border:1px solid #b9cbbb;border-radius:6px;padding:10px 12px;margin-top:6px;box-sizing:border-box}
+#release-radar .rr-decision textarea{resize:vertical;min-height:100px;font:14px/1.5 "Segoe UI",sans-serif}
+#release-radar .rr-decision select{min-height:44px;font:14px "Segoe UI",sans-serif}
+#release-radar .rr-decision input{min-height:44px}
+#release-radar .rr-decision input:focus-visible,#release-radar .rr-decision textarea:focus-visible,#release-radar .rr-decision select:focus-visible{outline:3px solid #55a994;outline-offset:3px}
+#release-radar #rr-decision-error{color:#953d31;font-weight:600}
+#release-radar .rr-proof-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:24px}
+#release-radar .rr-proof-strip>span{display:flex;flex-direction:column;background:#edf4e9;border:1px solid #d9e5d3;border-radius:8px;padding:18px 20px;font-size:12px;color:#52694b}
+#release-radar .rr-proof-strip strong{font-size:16px;color:#294f37;margin-bottom:4px}
+#release-radar .rr-story-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+#release-radar .rr-story{padding:26px;margin-bottom:24px;overflow-wrap:anywhere}
+#release-radar .rr-story h2{font-size:22px;margin-bottom:16px;line-height:1.35}
+#release-radar .rr-story p,#release-radar .rr-story li{font-size:14px;line-height:1.8;color:#4d634e}
+#release-radar .rr-story small{display:block;font-size:12px;color:#62735d;line-height:1.7}
+#release-radar .rr-story a{text-decoration:underline;text-underline-offset:3px}
+#release-radar .rr-story ul,#release-radar .rr-story ol{padding-left:21px;margin:0 0 18px}
+#release-radar .rr-story li{padding-left:5px;margin-bottom:12px}
+#release-radar .rr-architecture li{padding:10px 12px;background:#f1f6ed;border-radius:6px}
+#release-radar .rr-walkthrough{display:grid;grid-template-columns:1fr 1fr;gap:8px 35px}
+#release-radar .rr-story .rr-actions{justify-content:flex-start}
+#release-radar .rr-btn{min-height:44px}
+#release-radar .rr-sidebar nav a{min-height:44px}
+@media(max-width:1000px){#release-radar .rr-story-grid{grid-template-columns:1fr}#release-radar .rr-walkthrough{grid-template-columns:1fr}}
+@media(max-width:720px){#release-radar .rr-proof-strip{grid-template-columns:1fr}#release-radar .rr-proof-strip>span{padding:14px 18px}#release-radar .rr-story{padding:20px}#release-radar .rr-story h2{font-size:20px}#release-radar .rr-decision-fields{grid-template-columns:1fr;gap:0}#release-radar .rr-sidebar nav{justify-content:flex-start}#release-radar .rr-head-actions{width:100%}#release-radar .rr-head-actions .rr-btn{flex:1}}
+@media(max-width:720px){#release-radar .rr-sidebar nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px;overflow:visible}#release-radar .rr-sidebar nav a{min-width:0;min-height:60px;padding:8px 2px;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;white-space:normal;text-align:center;line-height:1.3;font-size:10px}}
