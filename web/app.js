@@ -27,7 +27,7 @@
     function badge(value) {
       var key = String(value || 'UNCLASSIFIED').toUpperCase();
       var cls = Object.prototype.hasOwnProperty.call(severityOrder, key) ? ' rr-badge-' + key.toLowerCase() : '';
-      return '<span class="rr-badge' + cls + '">' + esc(key) + '</span>';
+      return '<span class="rr-badge' + cls + '">' + esc(key === 'TEST' ? 'NEEDS TESTING' : key) + '</span>';
     }
     function confidence(value) {
       if (value == null || value === '') return 'Confidence not provided';

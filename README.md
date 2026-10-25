@@ -18,6 +18,8 @@ Built for the **AI World Hackathon** by **Team 4**.
 
 The preview is published from the feature branch through GitHub Pages while APEX deployment is deferred. It uses **synthetic data and prepared responses**, makes no live AI calls, and keeps new runs only in the browser session. Select a finding to inspect its configuration, source evidence, and test steps. See the [90-second demo guide](docs/DEMO.md).
 
+The interface uses a restrained, spacious visual style inspired by Oracle APEX [Universal Theme](https://docs.oracle.com/en/database/oracle/apex/26.1/apxdc/universal-theme-design-system.html) and its [Redwood Light theme style](https://docs.oracle.com/en/database/oracle/apex/26.1/apxdc/theme-styles.html). The browser preview is a custom, APEX-scoped implementation; when installing it in APEX, select a compatible Universal Theme style and verify appearance, keyboard use, and contrast in the target workspace. **26C is a Fusion release designation, not a UI certification for this preview.**
+
 To run the same interface locally:
 
 ```bash
