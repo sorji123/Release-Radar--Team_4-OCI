@@ -1,0 +1,58 @@
+{
+  "Northwind Telecom": {
+    "DEMO": {
+      "nw-account-sync|demo-account-api": {
+        "severity": "BREAKING",
+        "confidence": 99,
+        "rationale": "The fictional integration calls the exact endpoint that the synthetic release removes. Update the integration before upgrading.",
+        "cited_text": "the /legacy/accounts endpoint is removed",
+        "test_case": {
+          "title": "Verify account sync after endpoint migration",
+          "steps": [
+            "Point a test copy of the integration at /v2/accounts.",
+            "Run a sync with a known test account.",
+            "Compare the resulting billing record with the source account."
+          ],
+          "expected": "The integration completes and the billing record matches the test account."
+        }
+      },
+      "nw-backlog-report|demo-backlog-report": {
+        "severity": "TEST",
+        "confidence": 85,
+        "rationale": "The fictional report uses the affected subject area. The release preserves columns, so verify aggregation behavior without assuming breakage.",
+        "cited_text": "verify totals when using queue grouping",
+        "test_case": {
+          "title": "Compare service backlog totals",
+          "steps": [
+            "Record totals for a fixed set of service requests.",
+            "Run the report after the update with and without queue grouping.",
+            "Reconcile both totals against the fixed input set."
+          ],
+          "expected": "Grouped and ungrouped totals match the known service request count."
+        }
+      },
+      "nw-summary-field|demo-service-summary": {
+        "severity": "OPPORTUNITY",
+        "confidence": 90,
+        "rationale": "The optional fictional feature may replace manual summary drafting. An agent should compare its output with the current process before adoption.",
+        "cited_text": "administrators can opt in to automatic service request summaries",
+        "test_case": {
+          "title": "Evaluate automatic summaries against manual summaries",
+          "steps": [
+            "Enable the optional feature in a test environment.",
+            "Generate a summary for a sample request with known notes.",
+            "Have an agent compare it with the manually maintained summary."
+          ],
+          "expected": "The agent can review a draft containing the important facts from the sample request notes."
+        }
+      },
+      "nw-quote-validation|demo-account-api": {
+        "severity": "NONE",
+        "confidence": 95,
+        "rationale": "The signed-quote validation does not use the account endpoint. The supplied release text does not establish an impact on opportunity validation.",
+        "cited_text": "",
+        "test_case": null
+      }
+    }
+  }
+}

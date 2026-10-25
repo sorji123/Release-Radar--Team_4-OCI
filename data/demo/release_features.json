@@ -1,0 +1,42 @@
+[
+  {
+    "feature_key": "demo-account-api",
+    "release_code": "DEMO",
+    "module": "Sales",
+    "title": "Synthetic example: legacy account endpoint retirement",
+    "description": "In this fictional release, the /legacy/accounts endpoint is removed. Account integrations must use /v2/accounts before upgrading.",
+    "opt_in": "N",
+    "source_kind": "SYNTHETIC",
+    "source_url": "https://example.invalid/release-radar/demo/account-api"
+  },
+  {
+    "feature_key": "demo-backlog-report",
+    "release_code": "DEMO",
+    "module": "Service",
+    "title": "Synthetic example: service backlog report grouping",
+    "description": "In this fictional release, the service backlog subject area gains an optional queue grouping column. Existing report columns remain available; verify totals when using queue grouping.",
+    "opt_in": "N",
+    "source_kind": "SYNTHETIC",
+    "source_url": "https://example.invalid/release-radar/demo/backlog-report"
+  },
+  {
+    "feature_key": "demo-service-summary",
+    "release_code": "DEMO",
+    "module": "Service",
+    "title": "Synthetic example: optional service request summaries",
+    "description": "In this fictional release, administrators can opt in to automatic service request summaries. The feature drafts a summary from service request notes for an agent to review.",
+    "opt_in": "Y",
+    "source_kind": "SYNTHETIC",
+    "source_url": "https://example.invalid/release-radar/demo/service-summary"
+  },
+  {
+    "feature_key": "demo-payroll-layout",
+    "release_code": "DEMO",
+    "module": "HCM",
+    "title": "Synthetic example: payroll page layout",
+    "description": "In this fictional release, the payroll landing page includes an extra informational tile. No Sales or Service behavior changes are described.",
+    "opt_in": "N",
+    "source_kind": "SYNTHETIC",
+    "source_url": "https://example.invalid/release-radar/demo/payroll-layout"
+  }
+]

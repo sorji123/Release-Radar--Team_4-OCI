@@ -1,0 +1,6 @@
+{
+  "provider": "ocigenai",
+  "credential_name": "OCI_GENAI_CRED",
+  "url": "https://inference.generativeai.REPLACE_REGION.oci.oraclecloud.com/20231130/actions/embedText",
+  "model": "REPLACE_WITH_VERIFIED_EMBEDDING_MODEL"
+}

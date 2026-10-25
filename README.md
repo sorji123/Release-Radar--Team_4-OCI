@@ -8,7 +8,32 @@ Release Radar is a proposed AI assistant that compares Oracle Fusion Cloud relea
 
 Built for the **AI World Hackathon** by **Team 4**.
 
-**Project status:** MVP planning. This repository contains the [hackathon build plan](Release%20Radar.docx) and this guide. The application, sample datasets, and deployment are planned work; the features below describe the intended MVP.
+**Project status:** Development starter. The repository now includes a runnable offline fixture demo, Oracle schema and query scripts, a classification prompt, validation tests, and an APEX page guide. Live OCI model calls, real release data, the APEX application, and deployment are still to be implemented. The product features below describe the intended MVP.
+
+**Application platform: Oracle APEX.** The team will build on Autonomous Database and OCI Generative AI, with APEX providing the interface. See the [APEX deployment plan](docs/DEPLOYMENT.md).
+
+## Start developing
+
+Clone this repository and open a terminal in its root folder. Use **Python 3.11 or newer** for the offline development harness; it needs no third-party packages or cloud credentials.
+
+```bash
+python -m release_radar demo
+python -m unittest discover -s tests -v
+```
+
+On Windows, `py` can replace `python`; on macOS/Linux, use `python3` if needed. Run from the source checkout: the demo reads the repository's `data/` and `prompts/` directories.
+
+The demo writes `build/demo-report.json`, with six fictional Northwind Telecom objects checked against four **synthetic** release features. Expect one Breaking finding, one Needs testing finding, one Opt-in opportunity, and three objects without findings. The vectors and responses are hand-authored fixtures, so these results demonstrate the pipeline contract, not AI accuracy or actual Oracle release impacts. The demo uses release code `DEMO`, not `26D`.
+
+| Ready in this starter | Next development work |
+| --- | --- |
+| Offline candidate matching, response validation and JSON report | OCI embeddings and live classification |
+| Six sample configuration types and separate expected labels | Curate 20–30 real Oracle release items and about 25 fictional configurations |
+| Oracle tables, run tracking, candidate query and reporting views | Install and verify on Autonomous Database; implement the analysis writer |
+| APEX report SQL and page specifications | Create/export the APEX application and connect the interface |
+| Unit tests and GitHub Actions workflow | Run cloud integration tests in the selected tenancy |
+
+Start with the [development guide](docs/DEVELOPMENT.md), then follow the [database setup](database/README.md) and [APEX page guide](apex/README.md). See [data guidance](data/README.md) before replacing the fixtures.
 
 ## Why Release Radar?
 
@@ -55,7 +80,7 @@ Uploading a customer's own CSV or JSON configuration is a secondary MVP feature.
 
 ## How it works
 
-The planned application uses Oracle Autonomous Database to store data and coordinate analysis, OCI Generative AI to create embeddings and evaluate potential impacts, and Oracle APEX to present the results.
+The planned application uses Oracle Autonomous Database for storage and vector search, OCI Generative AI for embeddings and impact analysis, and Oracle APEX for the interface. The Python harness supports offline development and the build plan's fallback integration path.
 
 ```mermaid
 flowchart TD
@@ -83,7 +108,7 @@ The analysis has three main steps:
 | Oracle APEX | Provide customer/release selection, dashboards, and finding details. |
 | Python with the OCI SDK | Serve as a fallback for model calls if the PL/SQL integration blocks progress. |
 
-The primary design does not require a separate application server. The Python fallback would write findings to the same database for APEX to display.
+The primary APEX design does not require a separate application server. The Python fallback would write findings to the same database for APEX to display. The live analysis entry point is still to be implemented.
 
 ## Demo data
 
@@ -137,7 +162,7 @@ Confirm model names, endpoints, and regional availability before adapting the do
 
 ### Suggested build order
 
-1. **Establish the foundation.** Provision the database, create an APEX app and demo user, verify the live URL, and complete one embedding call.
+1. **Establish the foundation.** Provision the database, create a minimal APEX app and demo user, verify the live URL, and complete one embedding call.
 2. **Prepare and load data.** Create `release_features`, `config_objects`, and `impact_findings`; load the two curated datasets and generate embeddings.
 3. **Build the analysis.** Retrieve candidate matches, classify them with the supplied prompt, validate the returned JSON and cited text, and save findings under an analysis run.
 4. **Build the interface.** Add the run form, severity counts, findings list, and detail page with evidence and generated tests.
@@ -168,7 +193,17 @@ The planned 90-second demo follows one breaking finding from the dashboard to it
 
 ## Repository contents
 
-| File | Description |
+| Path | Description |
 | --- | --- |
 | [README.md](README.md) | Project overview, planned workflow, scope, and implementation guide. |
 | [Release Radar.docx](Release%20Radar.docx) | Original hackathon build plan, architecture, code skeletons, validation checklist, and pitch outline. |
+| [release_radar/](release_radar/) | Python offline demo, candidate matching, prompt builder, and response validation. |
+| [database/](database/) | Oracle schema, reporting views, candidate query and manual server checks. |
+| [apex/](apex/) | Page specifications and SQL for run history, dashboard, and finding details. |
+| [data/](data/) | Synthetic fixtures, separate evaluation labels, and real-data preparation guidance. |
+| [prompts/classify.txt](prompts/classify.txt) | Versioned classification contract for the future model integration. |
+| [config/](config/) | OCI embedding parameter example; no credentials. |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | First tasks, architecture boundaries, and acceptance criteria. |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Selected APEX platform and deployment milestones. |
+| [tests/](tests/) | Offline behavior, failure-path, and data-contract tests. |
+| [.github/workflows/checks.yml](.github/workflows/checks.yml) | Python tests and demo checks for pushes and pull requests. |

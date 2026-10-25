@@ -1,0 +1,21 @@
+{
+  "notice": "Hand-authored 4D vectors for exercising candidate selection. These are not model embeddings and must not be loaded into the 1024D Oracle schema.",
+  "features": {
+    "DEMO": {
+      "demo-account-api": [1, 0, 0, 0],
+      "demo-backlog-report": [0, 1, 0, 0],
+      "demo-service-summary": [0, 0, 1, 0],
+      "demo-payroll-layout": [0, 0, 0, 1]
+    }
+  },
+  "objects": {
+    "Northwind Telecom": {
+      "nw-account-sync": [1, 0, 0, 0],
+      "nw-backlog-report": [0, 1, 0, 0],
+      "nw-summary-field": [0, 0, 1, 0],
+      "nw-quote-validation": [0.8, 0, 0, 0.6],
+      "nw-service-tab": [0, 0, 0, 1],
+      "nw-discount-approval": [0, 0, 0, 1]
+    }
+  }
+}

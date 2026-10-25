@@ -1,0 +1,8 @@
+{
+  "nw-account-sync": "BREAKING",
+  "nw-backlog-report": "TEST",
+  "nw-summary-field": "OPPORTUNITY",
+  "nw-quote-validation": "NONE",
+  "nw-service-tab": "NONE",
+  "nw-discount-approval": "NONE"
+}

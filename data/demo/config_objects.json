@@ -1,0 +1,56 @@
+[
+  {
+    "object_key": "nw-account-sync",
+    "customer": "Northwind Telecom",
+    "object_type": "OIC",
+    "name": "Nightly account sync to billing",
+    "module": "Sales",
+    "description": "A fictional integration reads the legacy accounts endpoint each night and sends account updates to billing.",
+    "snippet": "GET /legacy/accounts"
+  },
+  {
+    "object_key": "nw-backlog-report",
+    "customer": "Northwind Telecom",
+    "object_type": "REPORT",
+    "name": "Weekly service request backlog",
+    "module": "Service",
+    "description": "A fictional report aggregates service backlog counts and exports totals for operations.",
+    "snippet": "Subject area: Service Backlog; measures: open request count"
+  },
+  {
+    "object_key": "nw-summary-field",
+    "customer": "Northwind Telecom",
+    "object_type": "APP_COMPOSER",
+    "name": "Manual service request summary field",
+    "module": "Service",
+    "description": "Agents manually copy service request notes into a custom summary field.",
+    "snippet": "Custom field: ManualSummary_c"
+  },
+  {
+    "object_key": "nw-quote-validation",
+    "customer": "Northwind Telecom",
+    "object_type": "GROOVY",
+    "name": "Require signed quote before close",
+    "module": "Sales",
+    "description": "A fictional opportunity validation requires a signed quote before closing. It does not call the accounts endpoint.",
+    "snippet": "Before closing: require SignedQuote_c = true"
+  },
+  {
+    "object_key": "nw-service-tab",
+    "customer": "Northwind Telecom",
+    "object_type": "PAGE_COMPOSER",
+    "name": "Site survey tab",
+    "module": "Service",
+    "description": "A custom service page tab displays site survey details, without summaries or backlog reporting.",
+    "snippet": "Tab label: Site Survey"
+  },
+  {
+    "object_key": "nw-discount-approval",
+    "customer": "Northwind Telecom",
+    "object_type": "WORKFLOW",
+    "name": "Discount approval above 15 percent",
+    "module": "Sales",
+    "description": "A fictional approval rule routes large opportunity discounts to VP Sales.",
+    "snippet": "Discount > 15% -> VP Sales approval"
+  }
+]
