@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "customer": "Northwind Telecom",
+  "source_release": "26C",
+  "is_sample": true,
+  "description": "Fictional customization inventory for testing the upload flow. This is not a native Oracle export.",
+  "customizations": [
+    {"object_key":"nw-bicc","object_type":"OIC","module":"Sales","name":"Nightly customer data extract","description":"A custom BI Cloud Connector (BICC) extraction job sends account data to the billing warehouse.","snippet":"BICC task: customer_billing_extract; review selected BI view objects before upgrade."},
+    {"object_key":"nw-tabs","object_type":"PAGE_COMPOSER","module":"Service","name":"Site survey tab on service requests","description":"A Visual Builder extension adds a custom tab and field visibility rules to the service request details page.","snippet":"Custom tab: Site Survey; page: Service Request Details"},
+    {"object_key":"nw-summary","object_type":"APP_COMPOSER","module":"Service","name":"Manual resolution summary","description":"Agents manually write a resolution summary in a custom field after closing a service request.","snippet":"Custom field: ResolutionSummary_c; status: Resolved"},
+    {"object_key":"nw-contact","object_type":"PAGE_COMPOSER","module":"Service","name":"Contact lookup for incoming calls","description":"A custom phone call flow selects contacts using predefined contact search filters when multiple matches exist.","snippet":"Search filters: phone number, account and active contact"},
+    {"object_key":"nw-sales-report","object_type":"REPORT","module":"Sales","name":"Product revenue dashboard","description":"An OTBI report uses Sales - CRM Opportunities and Products Real Time and the Product folder. Sales Catalog is configured in PIM.","snippet":"Subject area: Sales - CRM Opportunities and Products Real Time; column: Product.Name"},
+    {"object_key":"nw-smarttext","object_type":"APP_COMPOSER","module":"Service","name":"Reusable customer email replies","description":"Custom SmartText templates help agents compose service request email replies.","snippet":"SmartText: Customer follow-up; manually maintained response templates"},
+    {"object_key":"nw-discount","object_type":"WORKFLOW","module":"Sales","name":"Discount approval above 15%","description":"A custom approval rule sends high-value discounts to the VP of Sales.","snippet":"Discount > 15% requires VP approval"},
+    {"object_key":"nw-groovy","object_type":"GROOVY","module":"Sales","name":"Signed quote validation","description":"An opportunity validation requires a signed quote before an opportunity can be closed.","snippet":"Before close: SignedQuote_c must be true"}
+  ]
+}
