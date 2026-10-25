@@ -1,12 +1,17 @@
 # Development guide
 
+For the initial website, run `python3 -m release_radar site` and follow
+[the MVP guide](MVP.md). The new browser importer and rule-based review are
+independent of the synthetic Python pipeline below. Browser logic lives in
+`web/rr-core.js`; run `node tests/web/core.test.mjs` for its checks. Python
+website packaging and public readiness checking live in `release_radar/site.py`.
+
 The starter follows the backend plan in the README and `Release Radar.docx`:
 Autonomous Database owns persistent data and OCI Generative AI supplies
 embeddings and classification. **Oracle APEX is the selected application
 platform**, following the original build plan.
-The Python package is a small offline harness and a
-starting point for the document's Python fallback. It is not a web server and
-does not connect to Oracle or OCI yet.
+The Python package includes the original offline harness and a local static-site
+preview. It does not yet connect to an Oracle database or make OCI model calls.
 
 ## Work locally
 

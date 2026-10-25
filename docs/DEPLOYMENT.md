@@ -7,11 +7,16 @@ run form, dashboard, finding evidence and regression tests.
 
 ## Current state
 
-The repository includes database setup scripts, APEX region SQL and page
-specifications, a versioned classification prompt, and an offline Python
-fixture harness. A deployed APEX app, live model integration and an executable
-analysis entry point are still to be built. The Python CLI is a development
-tool and a starting point for the document's fallback integration path.
+The repository includes a working browser MVP with configuration import,
+reviewed 26D sources, deterministic matching, readable findings and report
+downloads. Install its static assets in APEX using [the MVP guide](MVP.md).
+The local preview's Python server serves public assets and checks Oracle's
+readiness index; customer analysis takes place in the browser.
+
+The database setup scripts, region SQL, classification prompt and Python
+fixture harness remain the foundation for the future database/OCI pipeline.
+No live OCI model, database-backed analysis writer or full APEX export is
+claimed by this MVP. The deployment sequence below applies to that next stage.
 
 ## Deployment sequence
 
