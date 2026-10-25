@@ -1,0 +1,39 @@
+{
+  "measured_at": "2026-10-25T23:13:54.313Z",
+  "runtime": "v24.22.1",
+  "platform": "win32",
+  "method": "One warmup, then 25 iterations per size. Synthetic inventory copies. Matching only; excludes import, rendering, networking, human review and test execution.",
+  "budget": {
+    "objects": 1000,
+    "p95_ms": 1000
+  },
+  "runs": [
+    {
+      "objects": 8,
+      "features": 11,
+      "iterations": 25,
+      "findings": 6,
+      "p50_ms": 0.26,
+      "p95_ms": 0.85,
+      "max_ms": 1.89
+    },
+    {
+      "objects": 250,
+      "features": 11,
+      "iterations": 25,
+      "findings": 188,
+      "p50_ms": 4.61,
+      "p95_ms": 5.55,
+      "max_ms": 5.8
+    },
+    {
+      "objects": 1000,
+      "features": 11,
+      "iterations": 25,
+      "findings": 750,
+      "p50_ms": 20.07,
+      "p95_ms": 26.02,
+      "max_ms": 26.96
+    }
+  ]
+}

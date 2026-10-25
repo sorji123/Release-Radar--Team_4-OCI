@@ -1,4 +1,5 @@
 import json
+import shutil
 import tempfile
 import threading
 import unittest
@@ -11,7 +12,7 @@ from urllib.request import urlopen, Request
 from zipfile import ZipFile
 
 from release_radar.pipeline import ROOT
-from release_radar.site import build_site, check_latest, ReadinessParser, SiteHandler
+from release_radar.site import ASSETS, build_site, check_latest, ReadinessParser, SiteHandler
 
 
 class WebsiteBuildTests(unittest.TestCase):
@@ -22,6 +23,39 @@ class WebsiteBuildTests(unittest.TestCase):
         with ZipFile(bundle) as z:
             self.assertEqual(set(z.namelist()),{'rr-core.js','rr-data.js','rr-app.js','rr-style.css','icon.svg'})
             self.assertNotIn(b'authApexworkspace',z.read('rr-data.js'))
+        self.assertEqual({p.name for p in (ROOT/'build/site').iterdir()},
+                         {'index.html', '.nojekyll', *ASSETS})
+
+    def _copy_public_inputs(self, root):
+        names=['data/releases/26D.json','config/fusion-customizations.example.json',
+               'web/index.html', *('web/'+name for name in ASSETS)]
+        for name in names:
+            target=root/name
+            target.parent.mkdir(parents=True,exist_ok=True)
+            shutil.copyfile(ROOT/name,target)
+
+    def test_public_build_rejects_unexpected_files(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            self._copy_public_inputs(root)
+            public=root/'build/site'
+            public.mkdir(parents=True)
+            (public/'private.txt').write_text('test-only sentinel')
+            with self.assertRaisesRegex(ValueError,'unexpected files'):
+                build_site(root)
+
+    def test_catalog_requires_actionable_tests_and_valid_sources(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            self._copy_public_inputs(root)
+            path=root/'data/releases/26D.json'
+            original=json.loads(path.read_text(encoding='utf-8'))
+            for field,value in [('steps',[]),('expected',''),('source_url','https://example.com/26d/fake')]:
+                data=json.loads(json.dumps(original))
+                data['features'][0][field]=value
+                path.write_text(json.dumps(data),encoding='utf-8')
+                with self.assertRaises(ValueError):
+                    build_site(root)
 
     def test_current_release_detection_excludes_old_revisions(self):
         html='<h2>Features introduced October 2026</h2><a href="/sales">Sales 26D</a><a href="/service">Service 26D</a><h2>Recently revised readiness content</h2><a href="/old">Example 27A</a>'

@@ -1,5 +1,8 @@
 # Release Radar website MVP
 
+[Live demo and evidence](https://sorji123.github.io/Release-Radar--Team_4-OCI/#demo)
+· [Judge walkthrough](SUBMISSION.md) · [Rubric review](RUBRIC_REVIEW.md).
+
 The website accepts a customization inventory, checks it against a reviewed
 selection of real Oracle 26D release notes, and explains each suggestion with
 an official source, a next step and a regression test. It runs in the browser
@@ -19,8 +22,10 @@ No Python packages, npm installation, database or API key is required.
 1. Choose **Try Northwind Telecom**, or import an inventory.
 2. Inspect the extracted objects on **Your configuration**.
 3. Choose **Review against 26D**.
-4. Filter findings, open their evidence and suggested tests, and download the
-   Markdown or JSON report.
+4. Filter findings, open their evidence and suggested tests, assign an owner,
+   and record a review decision. Verified/not-applicable decisions require a note.
+5. Download the complete CSV action plan, Markdown report, or JSON report.
+   Exported decisions are human entries, not automated test results.
 
 The sample is fictional and visibly labeled. Its eight objects result in two
 priority reviews, two testing suggestions, two opportunities and two objects
@@ -30,8 +35,10 @@ synthetic pipeline fixtures.
 
 ## Import contract
 
-The real Fusion export is pending. The MVP supports a **normalized inventory**,
-not every native Fusion export package. Start with
+For source-matched impact review, the MVP supports a **normalized inventory**.
+It also previews four native setup definition tables from the repository's
+Financials ZIP, as described below. It does not support every native Fusion
+export package. Start with
 [`config/fusion-customizations.example.json`](../config/fusion-customizations.example.json).
 
 JSON can be a list or an envelope with `customer`, optional `source_release`,
@@ -66,8 +73,22 @@ ZIPs may contain these inventories, including nested folders. Other file types
 are skipped with a visible count. Supported files with invalid content fail the
 import rather than silently producing partial results. Limits: 5 MB input,
 10 MB expanded content, 100 ZIP entries and 1,000 objects. Encrypted ZIP, ZIP64,
-XML DTDs and external entities are rejected. Native MDS/FSM/Visual Builder
-package adapters will be based on the actual export when it arrives.
+XML DTDs and external entities are rejected.
+
+### Native setup preview
+
+The provided Financials setup ZIP is supported for these definition tables:
+`FND_APP_PROFILE_OPTION.csv`, `FND_APP_STANDARD_LOOKUP.csv`,
+`FND_APP_FLEX_VALUE_SET.csv`, and `FND_APP_DESCRIPTIVE_FLEXFIELD.csv`.
+Other native tables are reported as skipped. Empty supported tables are allowed.
+The importer uses each table's actual key and description fields, without
+copying security grants or profile values into the review inventory.
+
+These are setup definitions, not confirmed customizations. Product ownership
+and seeded/custom status remain unverified. They are retained as SETUP records
+with no dedicated impact rules and a manual-review explanation. Keep native
+setup exports and normalized inventories in separate uploads. MDS and complete
+Visual Builder packages remain unsupported.
 
 ## What the review means
 
@@ -85,8 +106,8 @@ cross-application rules can still flag relevant reporting/extraction concerns.
 
 `web/rr-core.js` uses explicit type, module and term-group rules. It does not
 pretend to make live OCI model calls or assign unsupported confidence scores.
-Future OCI/vector analysis can be added behind a separately tested adapter;
-the existing offline Python harness remains intact.
+OCI GenAI and Oracle-specific AI integration are outside the current scope.
+The existing offline Python harness remains separate, synthetic test material.
 
 ## Latest-release checks and catalog updates
 
@@ -146,7 +167,7 @@ Oracle documentation: [static files](https://docs.oracle.com/en/database/oracle/
 
 ## Privacy and review state
 
-Uploaded files, extracted objects and findings stay in memory in the current
+Uploaded files, extracted objects, reviewer decisions and findings stay in memory in the current
 browser page. They are not written to localStorage or sent to a model/server.
 Reloading clears them. Downloaded reports are created only when requested.
 The local preview serves only the UI assets and a read-only release-status

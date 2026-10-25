@@ -4,7 +4,15 @@
   const MAX_FILE = 5 * 1024 * 1024;
   const MAX_EXPANDED = 10 * 1024 * 1024;
   const MAX_OBJECTS = 1000;
-  const TYPE_LABELS = {GROOVY:'Groovy script', APP_COMPOSER:'Custom object or field', PAGE_COMPOSER:'Page extension', WORKFLOW:'Workflow or approval', OIC:'Integration', REPORT:'Report', OTHER:'Unrecognized type'};
+  const TYPE_LABELS = {GROOVY:'Groovy script', APP_COMPOSER:'Custom object or field', PAGE_COMPOSER:'Page extension', WORKFLOW:'Workflow or approval', OIC:'Integration', REPORT:'Report', SETUP:'Native setup definition', OTHER:'Unrecognized type'};
+  const NATIVE_SETUP={
+    'FND_APP_PROFILE_OPTION.csv':{key:'ProfileOptionName',name:'UserProfileOptionName',label:'Profile option'},
+    'FND_APP_STANDARD_LOOKUP.csv':{key:'LookupType',name:'Meaning',label:'Standard lookup'},
+    'FND_APP_FLEX_VALUE_SET.csv':{key:'ValueSetCode',name:'ValueSetCode',label:'Flex value set'},
+    'FND_APP_DESCRIPTIVE_FLEXFIELD.csv':{key:'DescriptiveFlexfieldCode',name:'Name',label:'Descriptive flexfield'}
+  };
+  const basename=filename=>filename.split(/[\\/]/).pop();
+  const nativeName=filename=>/^(FND_APP_|ORA_|KEY_FLEXFIELD_)/.test(basename(filename));
   const key = value => String(value ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const text = value => typeof value === 'string' ? value.trim() : '';
   function get(row, names) {
@@ -62,7 +70,7 @@
     if (customers.length>1) throw new Error('Review one customer at a time. This file contains multiple customer names.');
     return {objects,customer:customers[0]||customer||'Your organization',source_release:text(get(envelope,['source_release','release'])),is_sample:get(envelope,['is_sample'])===true,skipped,warnings,files:[filename]};
   }
-  function csvRows(source) {
+  function csvRows(source,allowEmpty=false) {
     const rows = []; let row=[], cell='', quoted=false, closed=false;
     for (let i=0;i<source.length;i++) {
       const c=source[i];
@@ -81,13 +89,29 @@
     }
     if(quoted)throw new Error('The CSV has an unclosed quoted field.');
     row.push(cell);if(row.some(x=>x.trim()))rows.push(row);
-    if(rows.length<2)throw new Error('The CSV needs a header and at least one configuration row.');
+    if(rows.length<(allowEmpty?1:2))throw new Error('The CSV needs a header and at least one configuration row.');
     const headers=rows.shift().map(x=>x.trim());
     if(headers.some(x=>!x) || new Set(headers.map(key)).size!==headers.length)throw new Error('CSV column names must be non-empty and unique.');
     return rows.map((values,i)=>{
       if(values.length!==headers.length)throw new Error(`CSV row ${i+2} has ${values.length} fields; expected ${headers.length}.`);
       return Object.fromEntries(headers.map((name,j)=>[name,values[j]]));
     });
+  }
+  function parseNativeSetup(source,filename) {
+    const shape=NATIVE_SETUP[basename(filename)];
+    const rows=csvRows(source,true),seen=new Set();
+    if(rows.length>MAX_OBJECTS)throw new Error(`Limit each review to ${MAX_OBJECTS} objects.`);
+    const objects=rows.map((row,index)=>{
+      const code=text(row[shape.key]);
+      if(!code)throw new Error(`Native ${shape.label} row ${index+1} needs ${shape.key}.`);
+      const object_key=basename(filename)+':'+code+':'+text(row.ApplicationId);
+      if(seen.has(object_key))throw new Error('Duplicate native setup definition: '+code);
+      seen.add(object_key);
+      const name=text(row[shape.name])||code,description=text(row.Description)||shape.label+' definition from the native setup export.';
+      if(name.length>200||description.length>12000)throw new Error('Native setup name or description exceeds the inventory limits.');
+      return {object_key,name,description,snippet:`${shape.label}: ${code}`,object_type:'SETUP',module:'Unspecified',customer:'Imported setup inventory',source_file:filename};
+    });
+    return {objects,customer:'Imported setup inventory',source_release:'',is_sample:false,import_kind:'NATIVE_SETUP',skipped:0,files:[filename],warnings:['Native setup preview: only profile-option, lookup, flex-value-set and descriptive-flexfield definitions are extracted. Seeded versus custom status and product ownership are not inferred. These records require manual review; no dedicated setup-impact rules are available.']};
   }
   function xmlRows(source) {
     if(/<!\s*(DOCTYPE|ENTITY)/i.test(source))throw new Error('XML documents with DTDs or external entities are not supported.');
@@ -106,6 +130,8 @@
     if(typeof source!=='string')throw new Error('The configuration must contain text.');
     source=source.replace(/^\uFEFF/,'');
     const ext=filename.split('.').pop().toLowerCase();
+    if(Object.hasOwn(NATIVE_SETUP,basename(filename)))return parseNativeSetup(source,filename);
+    if(nativeName(filename))throw new Error('This native setup table is not supported. Import the complete setup ZIP to preview supported definitions, or use a normalized customization inventory.');
     let payload;
     if(ext==='json') {try {payload=JSON.parse(source);} catch {throw new Error('The JSON is not valid. Check commas, quotes and brackets, then try again.');}}
     else if(ext==='csv')payload=csvRows(source);
@@ -137,6 +163,7 @@
       if(next>end)throw new Error('The ZIP directory is damaged.');
       const filename=new TextDecoder('utf-8',{fatal:true}).decode(bytes.slice(offset+46,offset+46+n));offset=next;
       if(filename.endsWith('/'))continue;
+      if(nativeName(filename)&&!Object.hasOwn(NATIVE_SETUP,basename(filename))){ignored.push(filename);continue;}
       if(filename.startsWith('__MACOSX/') || !/\.(json|csv|xml)$/i.test(filename)){ignored.push(filename);continue;}
       if(flags&1)throw new Error('Password-protected ZIPs are not supported.');
       if(![0,8].includes(method))throw new Error('Use a ZIP with standard Deflate compression.');
@@ -161,10 +188,12 @@
     }
     if(!results.length)throw new Error('No supported customization inventory was found in the ZIP. Native Fusion package mapping is pending a sample export.');
     const objects=results.flatMap(r=>r.objects), customers=[...new Set(objects.map(o=>o.customer))];
+    const native=results.some(r=>r.import_kind==='NATIVE_SETUP');
+    if(native&&results.some(r=>r.import_kind!=='NATIVE_SETUP'))throw new Error('Keep native setup exports and normalized customization inventories in separate uploads.');
     if(objects.length>MAX_OBJECTS)throw new Error(`Limit each review to ${MAX_OBJECTS} objects.`);
     if(customers.length>1)throw new Error('Review one customer at a time. The ZIP contains multiple customers.');
     if(new Set(objects.map(o=>o.object_key)).size!==objects.length)throw new Error('Duplicate object identifiers across ZIP files. Give each object a unique object_key.');
-    return {objects,customer:customers[0]||'Your organization',is_sample:results.every(r=>r.is_sample),source_release:results[0].source_release,skipped:results.reduce((a,r)=>a+r.skipped,0),files:results.flatMap(r=>r.files),warnings:[...results.flatMap(r=>r.warnings),...(ignored.length?[`${ignored.length} unsupported or metadata file(s) were skipped: ${ignored.slice(0,5).join(', ')}`]:[])]};
+    return {objects,customer:customers[0]||'Your organization',is_sample:results.every(r=>r.is_sample),import_kind:native?'NATIVE_SETUP':'NORMALIZED',source_release:results[0].source_release,skipped:results.reduce((a,r)=>a+r.skipped,0),files:results.flatMap(r=>r.files),warnings:[...new Set(results.flatMap(r=>r.warnings)),...(ignored.length?[`${ignored.length} unsupported or metadata file(s) were skipped: ${ignored.slice(0,5).join(', ')}`]:[])]};
   }
   async function parseFile(file) {
     if(!file || !file.size)throw new Error('Choose a non-empty configuration file.');
@@ -184,6 +213,7 @@
   }
   function analyze(inventory,catalog) {
     if(!inventory?.objects?.length)throw new Error('Import at least one customization before starting a review.');
+    const started=performance.now();
     const findings=[],unmatched=[];
     for(const object of inventory.objects){
       const sourceText=[object.name,object.description,object.snippet].join(' ');
@@ -197,19 +227,41 @@
         matches.push({id:`${object.object_key}::${feature.id}`,object,feature,matched_terms:terms,category:feature.category});
       }
       if(matches.some(m=>m.feature.id==='otbi-pim'))matches=matches.filter(m=>m.feature.id!=='otbi-review');
-      if(!matches.length)unmatched.push({...object,reason:object.object_type==='OTHER'?'This customization type needs a manual review.':!['Sales','Service','Common'].includes(object.module)?'This module has no dedicated coverage in the current catalog. Cross-application notes were checked where applicable.':'No matching note was found in the reviewed selection. Include this object in your usual regression testing.'});
+      if(!matches.length)unmatched.push({...object,reason:object.object_type==='SETUP'?'Native setup definition: customization status and module ownership are unverified. No dedicated impact rules are available; assign an owner for manual review.':object.object_type==='OTHER'?'This customization type needs a manual review.':!['Sales','Service','Common'].includes(object.module)?'This module has no dedicated coverage in the current catalog. Cross-application notes were checked where applicable.':'No matching note was found in the reviewed selection. Include this object in your usual regression testing.'});
       findings.push(...matches);
     }
     const rank={REVIEW:0,TEST:1,OPPORTUNITY:2};
     findings.sort((a,b)=>rank[a.category]-rank[b.category]||a.object.name.localeCompare(b.object.name)||a.feature.id.localeCompare(b.feature.id));
-    return {schema_version:1,mode:'RULE_BASED_REVIEW',release:catalog.release_code,verified_on:catalog.verified_on,generated_at:new Date().toISOString(),customer:inventory.customer,is_sample:inventory.is_sample,objects_checked:inventory.objects.length,features_checked:catalog.features.length,affected_objects:new Set(findings.map(f=>f.object.object_key)).size,counts:Object.fromEntries(Object.keys(rank).map(k=>[k,findings.filter(f=>f.category===k).length])),findings,unmatched,coverage_note:catalog.coverage_note,method:catalog.method,warnings:inventory.warnings};
+    return {schema_version:2,import_kind:inventory.import_kind||'NORMALIZED',mode:'RULE_BASED_REVIEW',release:catalog.release_code,source_release:inventory.source_release,verified_on:catalog.verified_on,generated_at:new Date().toISOString(),customer:inventory.customer,is_sample:inventory.is_sample,objects_checked:inventory.objects.length,features_checked:catalog.features.length,affected_objects:new Set(findings.map(f=>f.object.object_key)).size,counts:Object.fromEntries(Object.keys(rank).map(k=>[k,findings.filter(f=>f.category===k).length])),findings,unmatched,decisions:{},matching_ms:Math.round((performance.now()-started)*100)/100,coverage_note:catalog.coverage_note,method:catalog.method,warnings:inventory.warnings};
+  }
+  const REVIEW_STATUSES={OPEN:'To review',ACTION_PLANNED:'Action planned',VERIFIED:'Verified by reviewer',NOT_APPLICABLE:'Not applicable'};
+  function updateDecision(report,id,decision) {
+    if(!report.findings.some(f=>f.id===id))throw new Error('The finding is no longer in this report.');
+    if(!Object.hasOwn(REVIEW_STATUSES,decision.status))throw new Error('Choose a valid review status.');
+    const owner=text(decision.owner),note=text(decision.note);
+    if(owner.length>120 || note.length>2000)throw new Error('Use up to 120 characters for the owner and 2,000 for the review note.');
+    if(['VERIFIED','NOT_APPLICABLE'].includes(decision.status)&&!note)throw new Error('Add evidence or a reason before marking a finding verified or not applicable.');
+    return {...report,decisions:{...report.decisions,[id]:{status:decision.status,owner,note,updated_at:new Date().toISOString()}}};
+  }
+  function decisionFor(report,id) {return report.decisions?.[id]||{status:'OPEN',owner:'',note:''};}
+  function isNewerRelease(candidate,current) {
+    if(!/^\d{2}[A-D]$/.test(candidate)||!/^\d{2}[A-D]$/.test(current))throw new Error('Invalid release code.');
+    return candidate>current;
+  }
+  function actionPlanCsv(report) {
+    const cell=value=>{let valueText=String(value??'');if(/^\s*[=+\-@]/.test(valueText))valueText="'"+valueText;return '"'+valueText.replace(/"/g,'""')+'"';};
+    const rows=[['Customer','Release','Object key','Customization','Category','Review status','Owner','Review note','Next action','Test steps','Expected result','Oracle source']];
+    for(const f of report.findings){const d=decisionFor(report,f.id);rows.push([report.customer,report.release,f.object.object_key,f.object.name,f.category,REVIEW_STATUSES[d.status],d.owner,d.note,f.feature.action,f.feature.steps.map((s,i)=>`${i+1}. ${s}`).join('\n'),f.feature.expected,f.feature.source_url]);}
+    for(const o of report.unmatched)rows.push([report.customer,report.release,o.object_key,o.name,'MANUAL_REVIEW','To review','','',o.reason,'Include in the normal regression test plan.','','']);
+    return '\uFEFF'+rows.map(row=>row.map(cell).join(',')).join('\r\n')+'\r\n';
   }
   function reportMarkdown(report) {
     const plain=value=>String(value??'').replace(/[<>]/g,'').replace(/[\r\n]+/g,' ').replace(/([\\`*_{}\[\]#!|])/g,'\\$1');
-    const lines=[`# Release Radar — ${plain(report.customer)}`,``,`${report.is_sample?'Sample configuration · ':''}Release ${report.release} · Catalog checked ${report.verified_on}`,``,`${report.objects_checked} customizations checked; ${report.affected_objects} have review suggestions.`,`${report.counts.REVIEW} priority reviews · ${report.counts.TEST} testing suggestions · ${report.counts.OPPORTUNITY} opportunities`, ``,report.coverage_note,report.method,``,...report.warnings.map(w=>`Note: ${plain(w)}`)];
-    for(const f of report.findings){lines.push(``,`## ${plain(f.object.name)}: ${plain(f.feature.title)}`,``,plain(f.feature.impact),``, `Next step: ${plain(f.feature.action)}`,``,`Oracle evidence: “${plain(f.feature.quote)}”`,`Source: ${f.feature.source_url}`,``,`### Suggested test`,...f.feature.steps.map((s,i)=>`${i+1}. ${plain(s)}`),`Expected: ${plain(f.feature.expected)}`);}
+    const lines=[`# Release Radar — ${plain(report.customer)}`,``,`${report.is_sample?'Sample configuration · ':''}Release ${report.release} · Catalog checked ${report.verified_on}`,``,`${report.objects_checked} configuration records checked; ${report.affected_objects} have review suggestions.`,`${report.counts.REVIEW} priority reviews · ${report.counts.TEST} testing suggestions · ${report.counts.OPPORTUNITY} opportunities`, ``,report.coverage_note,report.method,``,...report.warnings.map(w=>`Note: ${plain(w)}`)];
+    lines.push(``,`Matching time: ${report.matching_ms} ms (local rules only; excludes human review and test execution).`,`Review statuses are entered by a human and are not automated test results.`);
+    for(const f of report.findings){const d=decisionFor(report,f.id);lines.push(``,`## ${plain(f.object.name)}: ${plain(f.feature.title)}`,``,`Review: ${plain(REVIEW_STATUSES[d.status])} · Owner: ${plain(d.owner||'Unassigned')}`,`Reviewer note: ${plain(d.note||'None recorded')}`,``,plain(f.feature.impact),``, `Next step: ${plain(f.feature.action)}`,``,`Oracle evidence: “${plain(f.feature.quote)}”`,`Source: ${f.feature.source_url}`,``,`### Suggested test`,...f.feature.steps.map((s,i)=>`${i+1}. ${plain(s)}`),`Expected: ${plain(f.feature.expected)}`);}
     lines.push(``,`## Objects needing a separate review`,...report.unmatched.map(o=>`- ${plain(o.name)} — ${plain(o.reason)}`));
     return lines.join('\n')+'\n';
   }
-  root.ReleaseRadarCore={normalize,parseText,parseFile,csvRows,readZip,analyze,reportMarkdown,hasTerm,TYPE_LABELS,MAX_FILE};
+  root.ReleaseRadarCore={normalize,parseText,parseFile,csvRows,readZip,analyze,reportMarkdown,actionPlanCsv,updateDecision,decisionFor,REVIEW_STATUSES,isNewerRelease,hasTerm,TYPE_LABELS,MAX_FILE};
 })(globalThis);
