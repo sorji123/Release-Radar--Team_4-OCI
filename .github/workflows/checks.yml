@@ -18,9 +18,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate browser import and review behavior
+        run: node tests/web/core.test.mjs
       - name: Test contracts and offline pipeline
         run: python -m unittest discover -s tests -v
       - name: Run synthetic demo
         run: python -m release_radar demo
+      - name: Verify reproducible browser assets
+        run: |
+          python -m release_radar build-site
+          git diff --exit-code -- web/rr-data.js
       - name: Check whitespace
         run: git diff --check
