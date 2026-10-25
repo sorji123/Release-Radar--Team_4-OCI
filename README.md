@@ -2,15 +2,25 @@
 
 **Understand what an Oracle Fusion Cloud update means for your business—before you apply it.**
 
-Release Radar is a proposed AI assistant that compares Oracle Fusion Cloud release notes with a customer's customizations. It helps teams identify potential breaking changes, decide what to test, and discover new features that could replace custom work.
+Release Radar helps teams compare Oracle Fusion Cloud release notes with their customizations, decide what to test, and discover standard features that could simplify custom work. The first website MVP provides transparent, source-linked review suggestions; live AI analysis remains a future integration.
 
-> Upload your configuration, pick the release, get a ranked impact report with the regression tests already written.
+> Import your customizations, understand related release changes, and leave with a practical testing plan.
 
 Built for the **AI World Hackathon** by **Team 4**.
 
-**Project status:** Development starter. The repository now includes a runnable offline fixture demo, Oracle schema and query scripts, a classification prompt, validation tests, and an APEX page guide. Live OCI model calls, real release data, the APEX application, and deployment are still to be implemented. The product features below describe the intended MVP.
+**Project status:** Initial website MVP on `develop`. Import JSON, CSV, XML or ZIP customization inventories; inspect extracted objects; review related changes from 11 real Oracle 26D notes; and download a readable report with suggested tests. The real Fusion export is pending, so native export mapping is not yet verified. The current review uses explicit matching rules, not live AI predictions. APEX static assets and installation instructions are included; deployment to the team's APEX workspace is still pending.
 
 **Application platform: Oracle APEX.** The team will build on Autonomous Database and OCI Generative AI, with APEX providing the interface. See the [APEX deployment plan](docs/DEPLOYMENT.md).
+
+## Try the website
+
+```bash
+python3 -m release_radar site
+```
+
+Open **http://127.0.0.1:8765** and choose **Try Northwind Telecom**, or upload a configuration inventory. Files stay in your browser. The local preview checks Oracle's public readiness index; the reviewed catalog was verified on **October 25, 2026**.
+
+The interface is plain HTML, CSS and JavaScript and can be added to an APEX page without a Python or Node server. Run `python3 -m release_radar build-site` to package the assets. See the [MVP guide](docs/MVP.md) for the import contract, coverage, limitations and APEX installation steps.
 
 ## Start developing
 
@@ -25,8 +35,9 @@ On Windows, `py` can replace `python`; on macOS/Linux, use `python3` if needed. 
 
 The demo writes `build/demo-report.json`, with six fictional Northwind Telecom objects checked against four **synthetic** release features. Expect one Breaking finding, one Needs testing finding, one Opt-in opportunity, and three objects without findings. The vectors and responses are hand-authored fixtures, so these results demonstrate the pipeline contract, not AI accuracy or actual Oracle release impacts. The demo uses release code `DEMO`, not `26D`.
 
-| Ready in this starter | Next development work |
+| Available now | Next development work |
 | --- | --- |
+| Website imports, source-linked 26D findings and downloadable reports | Validate native Fusion export mapping and expand release coverage |
 | Offline candidate matching, response validation and JSON report | OCI embeddings and live classification |
 | Six sample configuration types and separate expected labels | Curate 20–30 real Oracle release items and about 25 fictional configurations |
 | Oracle tables, run tracking, candidate query and reporting views | Install and verify on Autonomous Database; implement the analysis writer |
@@ -49,34 +60,36 @@ Release Radar aims to turn that review into a focused list of actions, with supp
 - **Functional leads** responsible for Sales, Service, ERP, or HCM processes.
 - **System integrator (SI) teams** managing releases for customers.
 
-## What will users get?
+## What does the website provide?
 
-Each finding will connect a release feature to a specific customer configuration object and provide:
+Each finding connects an Oracle release feature to a customization and provides:
 
-- An impact category and confidence score.
+- A clear review category and the terms that matched.
 - A short explanation of the potential effect.
 - The release-note text supporting the finding.
 - A regression test with steps and an expected result.
 
 | Category | What it means | Suggested action |
 | --- | --- | --- |
-| **Breaking** | The supplied release information indicates that existing behavior will change or stop without action. | Review the affected configuration and plan a fix. |
+| **Review first** | A documented condition could affect the customization, but the condition still needs to be confirmed. | Check the affected setting or object before updating. |
 | **Needs testing** | A related change may affect the configuration, but breakage is not established. | Run the generated regression test. |
 | **Opt-in opportunity** | An optional new feature could replace something the customer built manually. | Evaluate whether to enable the feature. |
-| **No relevant impact found** | The supplied information does not establish a strong connection. | No finding is raised for that pair; this does not prove the configuration is unaffected. |
+| **No matching note** | No rule matched the reviewed selection of notes. | Keep the object in your regular test plan; this does not prove it is unaffected. |
 
-The planned executive summary will show counts by category, the top three risks, and an effort estimate.
+The dashboard shows findings by category and links to evidence and test steps.
+Confidence scores, confirmed-breaking classifications and effort estimates
+belong to the future validated AI workflow, not the current website.
 
-## Planned user journey
+## User journey
 
-1. **Select a customer and release.** The first demo uses a prepared sample customer and dataset.
-2. **Run the analysis.** Release Radar compares configurations with relevant release features.
-3. **Review the dashboard.** Findings appear in priority order, with breaking changes first.
+1. **Import a configuration.** Use an inventory for one customer or try the fictional sample.
+2. **Inspect your objects.** Check their names, modules, types and descriptions.
+3. **Review against 26D.** The dashboard lists related changes, with priority reviews first.
 4. **Inspect a finding.** View the configuration snippet beside the supporting release-note text.
 5. **Open the generated test.** Review the steps and expected result before testing in the customer's environment.
-6. **Review or download the summary.** Share the main risks and next steps with stakeholders once the summary feature is implemented.
+6. **Download the report.** Share the Markdown summary or use the JSON output in another tool.
 
-Uploading a customer's own CSV or JSON configuration is a secondary MVP feature. The first working flow uses curated data.
+The website MVP accepts a customer's normalized JSON, CSV or XML inventory, including supported files inside ZIPs. The sample inventory is fictional. Native Oracle export mapping will be added against the team's actual export.
 
 ## How it works
 
@@ -203,6 +216,9 @@ The planned 90-second demo follows one breaking finding from the dashboard to it
 | [data/](data/) | Synthetic fixtures, separate evaluation labels, and real-data preparation guidance. |
 | [prompts/classify.txt](prompts/classify.txt) | Versioned classification contract for the future model integration. |
 | [config/](config/) | OCI embedding parameter example; no credentials. |
+| [web/](web/) | Browser website, import validation, matching rules and report downloads. |
+| [docs/MVP.md](docs/MVP.md) | Run the site, prepare an inventory, understand coverage and install in APEX. |
+| [data/releases/26D.json](data/releases/26D.json) | Reviewed Oracle sources, short evidence excerpts and explicit matching rules. |
 | [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | First tasks, architecture boundaries, and acceptance criteria. |
 | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Selected APEX platform and deployment milestones. |
 | [tests/](tests/) | Offline behavior, failure-path, and data-contract tests. |
